@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/common/header::header(~{::title},~{},~{::style})">
+  <title>物业维修基金管理系统-添加字典</title>
+  <style>
+    .jb_2 {
+      padding-left: 30px !important;
+    }
+
+    .jb_3 {
+      padding-left: 40px !important;
+    }
+
+    .jb_4 {
+      padding-left: 50px !important;
+    }
+
+    .jb_5 {
+      padding-left: 60px !important;
+    }
+  </style>
+</head>
+<body>
+<div class="layui-tab-item layui-show" style="padding: 10px;">
+  <div id="LAY_preview">
+    <form class="layui-form" method="post" id="zd_addForm">
+      <div class="layui-form">
+        <table class="layui-table">
+          <tbody>
+          <tr>
+            <th style="width: 100px;">字典名</th>
+            <td>
+              <input type="text" name="zdm" lay-verify="required" placeholder=""
+                     class="layui-input" autocomplete="off"/>
+            </td>
+          </tr>
+          <tr>
+            <th style="width: 100px;">字典值</th>
+            <td>
+              <input type="text" name="zdz" lay-verify="required" placeholder=""
+                     class="layui-input" autocomplete="off"/>
+            </td>
+          </tr>
+          <tr>
+            <th style="width: 100px;">排序</th>
+            <td>
+              <input type="number" name="px" lay-verify="required" placeholder=""
+                     class="layui-input" value="0" autocomplete="off"/>
+            </td>
+          </tr>
+          <tr>
+            <th style="width: 100px;">是否启用</th>
+            <td>
+              <input type="checkbox" checked name="sfqy" lay-skin="switch" lay-filter="sfqy"
+                     lay-text="是|否" value="1" />
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <input type="hidden" name="fid" th:value="${fid}">
+      <button style="display:none;" lay-submit lay-filter="submitBut" class="sb"></button>
+    </form>
+  </div>
+</div>
+
+<div th:replace="/common/footer::footer()"></div>
+
+<script type="text/javascript" th:src="@{/static/js/sysMgr/zdMgr/zdMgr.js}"></script>
+
+<script th:inline="javascript">
+  const xtglid = [[${user.fk_xtglid}]];
+  layui.use(['element', 'laydate', 'table', 'form'], function () {
+    //let element = layui.element;
+    //let laydate = layui.laydate;
+    let form = layui.form;
+    //let table = layui.table;
+
+    form.on('submit(submitBut)', function (data) {
+      let zd = {};
+      for (let key in data.field) {
+        let val = data.field[key];
+        if (val) {
+          zd[key] = val;
+        }
+      }
+
+      let index = top.layer.getFrameIndex(window.name); //获取窗口索引
+
+      aeZd(zd, 'add', index);
+      return false;
+    });
+  });
+</script>
+
+</body>
+</html>

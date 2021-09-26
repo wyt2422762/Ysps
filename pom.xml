@@ -48,12 +48,6 @@
             <name>Aspose Java API</name>
             <url>https://repository.aspose.com/repo/</url>
         </repository>
-
-        <repository>
-            <id>aliyun</id>
-            <name>阿里云maven镜像</name>
-            <url>https://maven.aliyun.com/repository/public</url>
-        </repository>
     </repositories>
 
     <dependencies>

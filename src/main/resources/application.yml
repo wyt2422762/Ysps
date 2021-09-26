@@ -1,0 +1,37 @@
+# 服务配置
+server:
+  servlet:
+    context-path: /ysps
+  tomcat:
+    # tomcat的URI编码
+    uri-encoding: UTF-8
+  port: 8081
+
+# spring配置
+spring:
+  # 国际化信息
+  messages:
+    basename: i18n/**/*
+  profiles:
+    active: dev
+  devtools:
+    restart:
+      enabled: true
+  application:
+    name: ysps
+  mvc:
+    static-path-pattern: /ysps
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+
+# MyBatis配置
+#mybatis:
+#  mapperLocations: classpath*:mapper/**/*Mapper.xml
+
+#编号设置
+orderNo:
+  datacenterId: 1
+  machineId: 1
+
+

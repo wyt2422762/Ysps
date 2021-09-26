@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/common/header::header(~{::title},~{::link},~{})">
+  <title>政府投资项目预算资金评审系统</title>
+  <link rel="stylesheet" th:href="@{/static/css/login.css}" media="all">
+</head>
+<body>
+<img class="welcome" th:src="@{/static/image/login/left_bj.png}"/>
+<div id="pane">
+  <div class="pane-content">
+    <form class="layui-form zyl_pad_01" action="">
+    <div class="login">登录</div>
+    <div class="userpwd">
+      <img th:src="@{/static/image/login/icon_lxr.png}">
+      <input placeholder="请输入账号" name="userName" lay-verify="required|userName" autocomplete="off"/>
+    </div>
+    <div class="userpwd">
+      <img th:src="@{/static/image/login/icon_password.png}">
+      <input placeholder="请输入密码" type="password" name="password" lay-verify="required|pass"
+             autocomplete="off"/>
+    </div>
+    <button class="login-btn" lay-submit lay-filter="login">登&nbsp;录</button>
+    </form>
+  </div>
+</div>
+
+<div th:replace="/common/footer::footer()"></div>
+
+<script th:inline="javascript">
+  layui.use(['form'], function () {
+    let form = layui.form;
+    //监听form提交
+    form.on('submit(login)', function (data) {
+      $.ajax({
+        url: ctx + "login/login",
+        async: false,
+        type: "POST",
+        data: data.field,
+        success: function (data) {
+          window.top.location = ctx;
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+          top.layer.msg(XMLHttpRequest.responseJSON.msg);
+        }
+      });
+      return false;
+    });
+  });
+</script>
+</body>
+</html>

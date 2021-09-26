@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/common/header::header(~{::title},~{},~{::style})">
+  <title>物业维修基金管理系统-字典管理</title>
+  <style>
+    a {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<div class="layui-tab-item layui-show">
+  <div id="LAY_preview">
+    <blockquote class="layui-elem-quote layui-text">
+      字典管理
+    </blockquote>
+
+    <div style="padding: 10px;">
+      <div style="margin-bottom: 10px;">
+        <div class="layui-inline" style="float:right;">
+          <button th:if="${#lists.contains(opts, 'update')}" id="addZd" class="layui-btn layui-btn-normal"
+                  style="margin-left:15px;">新建字典
+          </button>
+        </div>
+        <div class="clearfix" style="clear: both;"></div>
+      </div>
+
+      <table id="zdTable" class="layui-table" lay-filter="zdTable"></table>
+
+      <script type="text/html" id="zdTableToolBar">
+        <a th:if="${#lists.contains(opts, 'update')}" class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a th:if="${#lists.contains(opts, 'del')}" class="layui-btn layui-btn-danger layui-btn-xs"
+           lay-event="del">删除</a>
+      </script>
+
+      <script type="text/html" id="zdIsLockTpl">
+        {{#  if(d.sfqy == 1){ }}
+        是
+        {{#  } else { }}
+        否
+        {{#  } }}
+      </script>
+
+    </div>
+  </div>
+</div>
+
+<div th:replace="/common/footer::footer()"></div>
+
+<script th:inline="javascript">
+  const xtglid = [[${user.fk_xtglid}]];
+  layui.config({
+    base: ctx + 'static/js/layuiExts/'
+  }).extend({
+    treeTable: 'treeTable/treeTable'
+  }).use(['element', 'laydate', 'table', 'form', 'treeTable'], function () {
+    //let element = layui.element;
+    //let laydate = layui.laydate;
+    let form = layui.form;
+    let table = layui.table;
+    let treeTable = layui.treeTable;
+
+    getZdTableData();
+
+    function getZdTableData() {
+      let url = ctx + 'GYFW/CZF_ZDGL/getList2';
+
+      //获取表格数据
+      treeTable.render({
+        elem: '#zdTable',
+        title: '字典列表',
+        url: url,
+        page: false,
+        is_click_icon: false,
+        is_checkbox: false,
+        is_cache: true,
+        primary_key: 'id',
+        parent_key: 'fid',
+        top_value: '00000000-0000-0000-0000-000000000000',
+        icon_key: 'zdm',
+        cols: [
+          {key: 'zdm', title: '字典名'},
+          {key: 'zdz', title: '字典值'},
+          {key: 'px', title: '排序'},
+          {
+            title: '是否启用', template: function (item) {
+              debugger;
+              if (item.sfqy == '1') {
+                return '是';
+              } else {
+                return '否';
+              }
+            }
+          },
+          {
+            align: 'center', title: '操作', template: function (item) {
+              if (item.level === 0) {
+                return "<a lay-filter=\"add\">添加</a> | <a lay-filter=\"edit\">编辑</a>"
+              } else {
+                return "<a lay-filter=\"edit\">编辑</a>"
+              }
+            }
+          }
+        ]
+      });
+    }
+
+    //工具条事件-删除
+    treeTable.on('tree(del)', function (obj) {
+      top.layer.confirm('确定要删除该字典？', {
+        btn: ['确定', '取消'] //按钮
+      }, function () {
+        $.ajax({
+          url: ctx + "GYFW/CZF_ZDGL/delZd/" + obj.item.id,
+          type: "POST",
+          success: function (data) {
+            top.layer.msg(data.msg);
+            window.location.reload();
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            top.layer.msg(XMLHttpRequest.responseJSON.msg);
+          }
+        });
+      }, function () {
+      });
+    });
+
+    //工具条事件-编辑
+    treeTable.on('tree(edit)', function (obj) {
+      let index = top.layer.open({
+        type: 2,
+        title: '编辑字典',
+        closeBtn: 1,
+        shadeClose: false,
+        area: ['720px', '80%'],
+        content: ctx + "GYFW/CZF_ZDGL/toEdit/" + obj.item.id,
+        btn: ['保存', '取消'],
+        yes: function (index, layero) {
+          let body = top.layer.getChildFrame('body', index);
+          let frm = $(body).find("form#zd_editForm");
+          $(frm).find("button.sb").click();
+          return false;
+        },
+        end: function () {
+          top.layer.close(index);
+        }
+      });
+    });
+
+    //工具条事件-添加
+    treeTable.on('tree(add)', function (obj) {
+      openAddDialog(obj.item.id);
+    });
+
+    //添加按钮事件
+    $("#addZd").on('click', function () {
+      openAddDialog("00000000-0000-0000-0000-000000000000");
+    });
+
+    function openAddDialog(fid) {
+      let index = top.layer.open({
+        type: 2,
+        title: '新建字典',
+        closeBtn: 1,
+        shadeClose: false,
+        area: ['720px', '80%'],
+        content: ctx + "GYFW/CZF_ZDGL/toAdd?fid=" + fid,
+        btn: ['保存', '取消'],
+        yes: function (index, layero) {
+          let body = top.layer.getChildFrame('body', index);
+          let frm = $(body).find("form#zd_addForm");
+          $(frm).find("button.sb").click();
+          return false;
+        },
+        cancel: function (index, layero) {
+        },
+        end: function () {
+          top.layer.close(index);
+        }
+      });
+    }
+
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+#开发环境配置文件
+
+# 业务配置
+bus:
+  api:
+    baseUrl: http://172.66.66.201:1019
+  fileBaseDir: D:/ysps/file
+
+# 日志配置
+logging:
+  file:
+    path: D:/ysps/log/

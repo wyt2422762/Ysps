@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/common/header::header(~{::title},~{},~{})">
+  <title>物业维修基金管理系统-编辑用户</title>
+</head>
+<body>
+<div style="padding: 20px;">
+  <form class="layui-form" method="post" id="user_editForm">
+    <div class="layui-form">
+      <table class="layui-table">
+        <tbody>
+        <tr>
+          <th style="width: 100px;">角色</th>
+          <td>
+            <select name="fk_jsid" lay-verify="required" lay-filter="role">
+              <option value="">请选择角色</option>
+              <option th:each="role,stat:${roleList}" th:value="${role.id}"
+                      th:text="${role.JSMC}" th:selected="${role.id == user.fk_jsid}"></option>
+            </select>
+          </td>
+          <th style="width: 100px;">是否启用</th>
+          <td>
+            <input type="checkbox" checked="" name="is_lock" lay-skin="switch" lay-filter="is_lock"
+                   lay-text="是|否" value="true" th:checked="${user.is_lock == true}"/>
+          </td>
+        </tr>
+        <tr>
+          <th>用户名</th>
+          <td>
+            <input type="text" name="username" lay-verify="required" placeholder=""
+                   class="layui-input" th:value="${user.username}"/>
+          </td>
+          <th>加密狗序列号</th>
+          <td>
+            <input type="text" name="jmgxlh" lay-verify="required" placeholder=""
+                   class="layui-input" th:value="${user.jmgxlh}"/>
+          </td>
+        </tr>
+        <tr>
+          <th>密码(必须包含数字、字母、特殊符号，长度最少8位)</th>
+          <td>
+            <input id="password" type="password" name="password" lay-verify="required|pass" placeholder=""
+                   class="layui-input"/>
+          </td>
+          <th>重复密码</th>
+          <td>
+            <input id="repassword" type="password" name="repassword" lay-verify="required|pass"
+                   placeholder="" class="layui-input"/>
+          </td>
+        </tr>
+        <tr>
+          <th>联系方式</th>
+          <td>
+            <input type="text" name="lxdh" lay-verify="required" placeholder=""
+                   class="layui-input" th:value="${user.lxdh}"/>
+          </td>
+          <th>联系人</th>
+          <td>
+            <input type="text" name="lxr" lay-verify="required" placeholder=""
+                   class="layui-input" th:value="${user.lxr}"/>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <input type="hidden" name="roleType" class="layui-input" th:value="1"/>
+      <input type="hidden" name="fk_xtglid" th:value="${user.fk_xtglid}">
+      <input type="hidden" name="id" th:value="${user.id}">
+    </div>
+    <button style="display:none;" lay-submit lay-filter="submitBut" class="sb"></button>
+  </form>
+</div>
+
+<div th:replace="/common/footer::footer()"></div>
+
+<script type="text/javascript" th:src="@{/static/js/sysMgr/userMgr/userMgr.js}"></script>
+<script type="text/javascript" th:src="@{/static/js/citys.js}"></script>
+
+<script th:inline="javascript">
+  const cYhType = [[${cuser.yhType}]];
+
+  layui.config({
+    base: ctx + 'static/js/layuiExts/'
+  }).use(['element', 'laydate', 'table', 'form'], function () {
+    //let element = layui.element;
+    //let laydate = layui.laydate;
+    let form = layui.form;
+    //let table = layui.table;
+
+    form.verify({
+      pass: function (value, item) {
+        if (!new RegExp("^(?=.*?[A-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$").test(value)) {
+          return '密码不符合要求';
+        }
+        if ($('input[name=repassword]').val() !== value) {
+          return '两次输入的密码不一致';
+        }
+      }
+    });
+
+    form.on('submit(submitBut)', function (data1) {
+      let user = {};
+      user['id'] = data1.field.id;
+      user['fk_xtglid'] = data1.field.fk_xtglid;
+      user['fk_jsid'] = data1.field.fk_jsid;
+      user['is_lock'] = !!data1.field.is_lock;
+      user['lxdh'] = data1.field.lxdh;
+      user['lxr'] = data1.field.lxr;
+      user['password'] = data1.field.password;
+      user['roleType'] = "1";
+      user['username'] = data1.field.username;
+
+      user['jmgxlh'] = data1.field.jmgxlh;
+
+      let index = top.layer.getFrameIndex(window.name); //获取窗口索引
+
+      aeUser(user, 'edit', index);
+
+      return false;
+    });
+
+  });
+</script>
+</body>
+</html>
