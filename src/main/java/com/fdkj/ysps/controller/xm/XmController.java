@@ -4,15 +4,20 @@ import com.alibaba.fastjson.JSONObject;
 import com.fdkj.ysps.api.model.system.User;
 import com.fdkj.ysps.api.model.system.Zd;
 import com.fdkj.ysps.api.model.xm.Xm;
+import com.fdkj.ysps.api.model.xm.XmFj;
 import com.fdkj.ysps.api.model.xm.XmReq;
 import com.fdkj.ysps.api.util.DictApi;
 import com.fdkj.ysps.api.util.XmApi;
 import com.fdkj.ysps.base.CusResponseBody;
 import com.fdkj.ysps.base.Page;
+import com.fdkj.ysps.config.BusConfig;
+import com.fdkj.ysps.config.ServerConfig;
 import com.fdkj.ysps.constant.Constants;
 import com.fdkj.ysps.controller.BaseController;
 import com.fdkj.ysps.error.BusinessException;
 import com.fdkj.ysps.utils.DateUtils;
+import com.fdkj.ysps.utils.file.FileUploadUtils;
+import com.fdkj.ysps.utils.file.FileUtils;
 import com.fdkj.ysps.utils.uuid.IdUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,18 +25,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 项目controller
@@ -47,6 +53,8 @@ public class XmController extends BaseController {
     private XmApi xmApi;
     @Autowired
     private DictApi dictApi;
+    @Autowired
+    private ServerConfig serverConfig;
 
     /**
      * 跳转
@@ -95,7 +103,7 @@ public class XmController extends BaseController {
         dictParams.put("fid", Constants.Dict.xmxz);
         List<Zd> dict_xmxz = dictApi.getZdList(request, dictParams);
         request.setAttribute("dict_xmxz", dict_xmxz);
-        return new ModelAndView("xmMgr/xm_add");
+        return new ModelAndView("xmMgr/xm_add1");
     }
 
     /**
@@ -243,6 +251,64 @@ public class XmController extends BaseController {
         } catch (Exception e) {
             log.error("更新项目失败", e);
             throw new BusinessException("更新项目失败: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), e);
+        }
+    }
+
+    /**
+     * 下载附件
+     *
+     * @param fileName 文件名称
+     * @param delete   是否删除
+     */
+    @RequestMapping("download")
+    public void downloadFile(HttpServletRequest request, HttpServletResponse response,
+                             @RequestParam("fileName") String fileName, @RequestParam("delete") Boolean delete) {
+        try {
+            if (!FileUtils.checkAllowDownload(fileName)) {
+                throw new Exception("文件名称" + fileName + "非法，不允许下载。 ");
+            }
+            String realFileName = System.currentTimeMillis() + fileName.substring(fileName.indexOf("_") + 1);
+            String filePath = BusConfig.getDownLoadBaseDir() + File.separator + fileName;
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+            FileUtils.setAttachmentResponseHeader(response, realFileName);
+            FileUtils.writeBytes(filePath, response.getOutputStream());
+            if (delete) {
+                FileUtils.deleteFile(filePath);
+            }
+        } catch (Exception e) {
+            log.error("下载文件失败", e);
+            throw new BusinessException("下载文件失败", HttpStatus.INTERNAL_SERVER_ERROR.value(), e);
+        }
+    }
+
+    /**
+     * 上传文件
+     *
+     * @param file 文件(多个)
+     * @param type 文件类型
+     * @return res
+     */
+    @RequestMapping("upload")
+    @ResponseBody
+    public ResponseEntity<CusResponseBody> uploadFile(MultipartFile file, String type) {
+        try {
+            // 上传文件路径
+            String filePath = BusConfig.getUploadBaseDir() + File.separator + "xm";
+
+            //文件名
+            String fileName = file.getOriginalFilename();
+            // 上传并返回新文件路劲
+            String fileNamePath = FileUploadUtils.upload(filePath, file);
+            //构造附件实体类
+            XmFj xmFj = new XmFj();
+            xmFj.setFjmc(fileName).setFjdz(fileNamePath).setFjlx_zd(type);
+
+            //构造返回数据
+            CusResponseBody cusResponseBody = CusResponseBody.success("上传成功", xmFj);
+            return new ResponseEntity<>(cusResponseBody, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("上传失败", e);
+            throw new BusinessException("上传失败: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), e);
         }
     }
 }
