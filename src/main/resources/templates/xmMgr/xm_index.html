@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/common/header::header(~{::title},~{},~{})">
+  <title>预算评审系统-项目管理</title>
+</head>
+<body>
+
+<input type="hidden" id="opts" th:value="${optsStr}"/>
+
+<div class="layui-tab-item layui-show" style="padding: 10px;">
+  <div id="LAY_preview">
+    <fieldset class="layui-elem-field layui-field-title">
+      <legend>项目列表</legend>
+    </fieldset>
+
+    <!-- 方案列表 -->
+    <div style="padding: 10px;">
+      <div>
+        <form class="layui-form" id="searchForm">
+          <div class="layui-form-item">
+            <div class="layui-inline">
+              <div class="layui-input-inline">
+                <input type="number" name="wtstartje" lay-verify="cnumber" placeholder="起始委托金额￥" autocomplete="off" class="layui-input">
+              </div>
+              <div class="layui-form-mid">-</div>
+              <div class="layui-input-inline">
+                <input type="number" name="wtendje" lay-verify="cnumber" placeholder="结束委托金额￥" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+
+            <div class="layui-inline">
+              <div class="layui-input-inline">
+                <input type="text" readonly name="wtstarttime" placeholder="起始委托时间" autocomplete="off" class="layui-input">
+              </div>
+              <div class="layui-form-mid">-</div>
+              <div class="layui-input-inline">
+                <input type="text" readonly name="wtendtime" placeholder="结束委托时间" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+          </div>
+
+          <div class="layui-form-item">
+            <div class="layui-inline">
+              <div class="layui-input-inline">
+                <input type="text" id="xmmc" name="xmmc" placeholder="请输入项目名称"
+                       autocomplete="off" class="layui-input"/>
+              </div>
+            </div>
+
+            <div class="layui-inline">
+              <div class="layui-input-inline">
+                <input type="text" id="xmssdw" name="xmssdw" placeholder="请输入项目实施单位"
+                       autocomplete="off" class="layui-input"/>
+              </div>
+            </div>
+
+            <div class="layui-inline">
+              <div class="layui-input-inline">
+                <select name="xmfl_zd" id="xmfl_zd">
+                  <option value="" selected>请选择项目分类</option>
+                  <option th:each="zd,stat:${dict_xmfl}" th:value="${zd.zdz}"
+                          th:text="${zd.zdm}"></option>
+                </select>
+              </div>
+            </div>
+
+            <div class="layui-inline">
+              <div class="layui-input-inline">
+                <button class="layui-btn layui-btn-danger btn_search" lay-submit lay-filter="formDemo1"
+                        style="margin-left:15px;">
+                  <i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </form>
+        <div class="clearfix"></div>
+
+        <div class="layui-inline">
+          <button th:if="${#lists.contains(opts, 'add')}" id="addXm" class="layui-btn layui-btn-normal"
+                  style="margin-left:15px;">新建项目
+          </button>
+        </div>
+
+      </div>
+
+      <table id="xmTable" class="layui-table" lay-filter="xmTable"></table>
+
+      <script type="text/html" id="xmTableToolBar">
+        <a th:if="${#lists.contains(opts, 'show')}" class="layui-btn layui-btn-xs" lay-event="mx">明细</a>
+        {{#  if('审核通过' == d.zt){ }}
+        <a th:if="${#lists.contains(opts, 'show')}" class="layui-btn layui-btn-normal layui-btn-xs"
+           lay-event="yf">预付</a>
+        <a th:if="${#lists.contains(opts, 'show')}" class="layui-btn layui-btn-warm layui-btn-xs"
+           lay-event="js">结算</a>
+        {{#  } }}
+      </script>
+
+    </div>
+
+  </div>
+</div>
+
+<div th:replace="/common/footer::footer()"></div>
+
+<script th:inline="javascript">
+  const cuser = [[${cuser}]];
+  const opts = [[${opts}]];
+
+  layui.config({
+    base: ctx + 'static/js/layuiExts/'
+  }).use(['element', 'laydate', 'table', 'form'], function () {
+    //let element = layui.element;
+    let laydate = layui.laydate;
+    let form = layui.form;
+    let table = layui.table;
+
+    //日期选择
+    laydate.render({
+      elem: "input[name='wtstarttime']",
+      done: function (value, date, endDate) {
+        let startDate = new Date(value).getTime();
+        let endTime = new Date($("input[name='endDate']").val()).getTime();
+        if (endTime < startDate) {
+          top.layer.msg('结束日期不能小于开始时间');
+          $("input[name='startDate']").val("");
+        }
+      }
+    });
+    laydate.render({
+      elem: "input[name='wtendtime']",
+      done: function (value, date, endDate) {
+        let startDate = new Date($("input[name='wtstarttime']").val()).getTime();
+        let endTime = new Date(value).getTime();
+        if (endTime < startDate) {
+          top.layer.msg('结束日期不能小于开始时间');
+          $("input[name='endDate']").val("");
+        }
+      }
+    });
+
+    //表单验证
+    form.verify({
+      cnumber: function (value, item) {
+        let reg = new RegExp("^\\d+(?:\\.\\d{1,2})?$")
+        if(value && isNaN(value)){
+          return "只能输入数字";
+        }
+        if(!reg.test(value)) {
+          return "最多两位小数";
+        }
+      }
+    });
+
+    getTableData();
+
+    //获取方案管理列表
+    function getTableData(params) {
+      let url = ctx + 'CZF/XMGL/getList';
+      //获取表格数据
+      table.render({
+        elem: '#xmTable',
+        title: '方案列表',
+        url: url, //数据接口
+        where: params, //请求参数
+        page: {
+          layout: ['prev', 'page', 'next', 'skip', 'count']
+        },
+        // page: true,
+        limit: 10,
+        //limits: [10, 20, 50],
+        cols: [[ //表头
+          {field: 'xmbh', title: '项目编号'},
+          {field: 'xmmc', title: '项目名称'},
+          {field: 'xmfl_zd', title: "项目分类"},
+          {field: 'xmxz_zd', title: "项目性质"},
+          {field: 'wtsj', title: "委托时间"},
+          {field: 'wtje', title: "委托金额"},
+          {field: 'slsj', title: "受理时间"},
+
+          /*{field: 'slsj', title: "审定金额"},
+          {field: 'slsj', title: "核减金额"},*/
+
+          {field: 'xmssdw', title: "项目实施单位"},
+          {field: 'lxr', title: "联系人"},
+          {field: 'lxfs', title: "联系方式"},
+          {field: 'sfkpxm', title: "是否快评项目"},
+          {field: 'sfkpxm', title: "是否快评项目"},
+          {field: 'zt', title: '项目状态'},
+
+          {toolbar: '#xmTableToolBar', align: 'center', fixed: 'right', title: '操作'}
+        ]],
+        parseData: function (res) { //res 即为原始返回的数据
+          return {
+            "code": res.success ? 0 : 1, //解析接口状态
+            "msg": res.msg, //解析提示文本
+            "count": res.data.totalRecord, //解析数据长度
+            "data": res.data.dataList //解析数据列表
+          };
+        }
+      });
+    }
+
+    //工具条事件
+    table.on('tool(xmTable)', function (obj) {
+      let data = obj.data; //获得当前行数据
+      let layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+      let tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+    });
+
+    //添加按钮事件
+    $("#addXm").on('click', function () {
+      let url = ctx + "CZF/XMGL/toAdd";
+      top.layer.open({
+        type: 2,
+        title: '添加项目',
+        closeBtn: 1,
+        shadeClose: false,
+        area: ['1000px', '80%'],
+        content: url,
+        /*btn: ['保存', '取消'],
+        yes: function (index, layero) {
+          let body = top.layer.getChildFrame('body', index);
+          let frm = $(body).find("form#xm_Form");
+          $(frm).find("button.sb").click();
+          return false;
+        },*/
+        end: function (index) {
+          top.layer.close(index);
+        }
+      });
+    });
+
+    //搜索按钮事件
+    form.on('submit(formDemo1)', function (data) {
+      let xmmc = data.field.xmmc;
+      let xmssdw = data.field.xmssdw;
+      let xmfl_zd = data.field.xmfl_zd;
+      let wtstartje = data.field.wtstartje;
+      let wtendje = data.field.wtendje;
+      let wtstarttime = data.field.wtstarttime;
+      let wtendtime = data.field.wtendtime;
+
+      let params = {};
+
+      if(xmmc) {
+        params['xmmc'] = xmmc;
+      }
+      if(xmssdw) {
+        params['xmssdw'] = xmssdw;
+      }
+      if(xmfl_zd) {
+        params['xmfl_zd'] = xmfl_zd;
+      }
+      if(wtstartje) {
+        params['wtstartje'] = wtstartje;
+      }
+      if(wtendje) {
+        params['wtendje'] = wtendje;
+      }
+      if(wtstarttime) {
+        params['wtstarttime'] = wtstarttime;
+      }
+      if(wtendtime) {
+        params['wtendtime'] = wtendtime;
+      }
+
+      getTableData(params);
+      return false;
+    });
+
+  });
+</script>
+</body>
+</html>

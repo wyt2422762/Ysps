@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/common/header::header(~{::title},~{},~{})">
+  <title>预算评审系统-添加方案</title>
+</head>
+<body>
+<div class="layui-tab-item layui-show" style="padding: 10px;">
+  <div id="LAY_preview">
+    <form class="layui-form" method="post" id="xm_Form">
+      <div class="layui-form">
+        <table class="layui-table" lay-size="sm">
+          <tr>
+            <th style="white-space: nowrap;">项目编号</th>
+            <td>
+              <input type="text" readonly id="xmbh" name="xmbh" lay-verify="required" class="layui-input"/>
+            </td>
+            <th style="white-space: nowrap;">项目名称</th>
+            <td>
+              <input type="text" name="xmmc" lay-verify="required" class="layui-input"/>
+            </td>
+            <th style="white-space: nowrap;">项目分类</th>
+            <td>
+              <!--<input type="text" name="xmfl_zd" lay-verify="required" class="layui-input"/>-->
+              <select name="xmfl_zd" id="xmfl_zd" lay-verify="required">
+                <option value="" selected>请选择项目分类</option>
+                <option th:each="zd,stat:${dict_xmfl}" th:value="${zd.zdz}"
+                        th:text="${zd.zdm}"></option>
+              </select>
+            </td>
+            <th style="white-space: nowrap;">项目性质</th>
+            <td>
+              <!--<input type="text" name="xmxz_zd" lay-verify="required" class="layui-input"/>-->
+              <select name="xmxz_zd" id="xmxz_zd" lay-verify="required">
+                <option value="" selected>请选择项目性质</option>
+                <option th:each="zd,stat:${dict_xmxz}" th:value="${zd.zdz}"
+                        th:text="${zd.zdm}"></option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th style="white-space: nowrap;">委托时间</th>
+            <td>
+              <input type="text" readonly name="wtsj" lay-verify="required" class="layui-input"/>
+            </td>
+            <th style="white-space: nowrap;">委托金额</th>
+            <td>
+              <input type="number" name="wtje" lay-verify="required|cnumber" class="layui-input"/>
+            </td>
+            <th style="white-space: nowrap;">联系人</th>
+            <td>
+              <input type="text" name="lxr" lay-verify="required|cnumber" class="layui-input"/>
+            </td>
+            <th style="white-space: nowrap;">联系电话</th>
+            <td>
+              <input type="text" name="lxr" lay-verify="required|cnumber" class="layui-input"/>
+            </td>
+          </tr>
+          <tr>
+            <th style="white-space: nowrap;">项目实施单位</th>
+            <td colspan="2">
+              <input type="text" name="xmssdw" lay-verify="required|cnumber" class="layui-input"/>
+            </td>
+            <th style="white-space: nowrap;">建设内容</th>
+            <td colspan="4">
+              <textarea name="jsbr" class="layui-textarea"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <th style="white-space: nowrap;">评审目标及要求</th>
+            <td colspan="7">
+              <textarea name="psmbjyq" class="layui-textarea"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <th style="white-space: nowrap;">评审结果使用方向</th>
+            <td colspan="7">
+              <textarea name="psmbjyq" class="layui-textarea"></textarea>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <button style="display:none;" lay-submit lay-filter="submitBut" class="sb"></button>
+    </form>
+  </div>
+</div>
+
+<div th:replace="/common/footer::footer()"></div>
+
+<script th:inline="javascript">
+  const cuser = [[${cuser}]];
+
+  layui.config({
+    base: ctx + 'static/js/layuiExts/'
+  }).extend({
+    step: 'step/step-lay/step'
+  }).use(['element', 'laydate', 'table', 'form', 'step'], function () {
+    //let element = layui.element;
+    let laydate = layui.laydate;
+    let form = layui.form;
+    let table = layui.table;
+    let step = layui.step;
+
+    laydate.render({
+      elem: "input[name='wtsj']"
+    });
+
+    getXmbh();
+
+    function getXmbh() {
+      let loadi = top.layer.load();
+      $.ajax({
+        url: ctx + "CZF/XMGL/getXmbh",
+        success: function (data) {
+          top.layer.close(loadi); //关闭弹出框
+          let xmbh = data.data;
+          $("#xmbh").val(xmbh);
+          return false;
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+          top.layer.close(loadi); //关闭弹出框
+          top.layer.msg(XMLHttpRequest.responseJSON.msg ? XMLHttpRequest.responseJSON.msg : "获取项目编号失败!");
+          return false;
+        }
+      });
+    }
+
+    //提交数据
+    form.on('submit(submitBut)', function (data) {
+      let indexOut = top.layer.getFrameIndex(window.name); //获取窗口索引
+
+      let xm = {};
+      for (let key in data.field) {
+        let val = data.field[key];
+        if (val) {
+          xm[key] = val;
+        }
+      }
+      let loadi = top.layer.load();
+      $.ajax({
+        url: ctx + "CZF/XMGL/aeXm",
+        type: "POST",
+        dataType: "json",
+        contentType: "application/json;charset=utf-8",
+        data: JSON.stringify(xm),
+        success: function (data) {
+          debugger;
+          top.layer.close(loadi); //关闭弹出框
+          top.layer.msg(data.msg);
+          if (indexOut) {
+            top.layer.close(indexOut); //关闭弹出框
+          }
+          return false;
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+          debugger;
+          top.layer.close(loadi); //关闭弹出框
+          top.layer.msg(XMLHttpRequest.responseJSON.msg ? XMLHttpRequest.responseJSON.msg : "操作失败!");
+          return false;
+        }
+      });
+      return false;
+    });
+
+  });
+</script>
+</body>
+</html>
