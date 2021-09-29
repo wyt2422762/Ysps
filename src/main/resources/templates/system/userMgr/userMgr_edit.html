@@ -28,41 +28,41 @@
           <th>用户名</th>
           <td>
             <input type="text" name="username" lay-verify="required" placeholder=""
-                   class="layui-input" th:value="${user.username}"/>
+                   class="layui-input" autocomplete="off" th:value="${user.username}"/>
           </td>
           <th>加密狗序列号</th>
           <td>
             <input type="text" name="jmgxlh" lay-verify="required" placeholder=""
-                   class="layui-input" th:value="${user.jmgxlh}"/>
+                   class="layui-input" autocomplete="off" th:value="${user.jmgxlh}"/>
           </td>
         </tr>
         <tr>
           <th>密码(必须包含数字、字母、特殊符号，长度最少8位)</th>
           <td>
-            <input id="password" type="password" name="password" lay-verify="required|pass" placeholder=""
-                   class="layui-input"/>
+            <input id="password" type="password" name="password" lay-verify="required|pass"
+                   class="layui-input" autocomplete="off"/>
           </td>
           <th>重复密码</th>
           <td>
             <input id="repassword" type="password" name="repassword" lay-verify="required|pass"
-                   placeholder="" class="layui-input"/>
+                   class="layui-input" autocomplete="off"/>
           </td>
         </tr>
         <tr>
           <th>联系方式</th>
           <td>
-            <input type="text" name="lxdh" lay-verify="required" placeholder=""
-                   class="layui-input" th:value="${user.lxdh}"/>
+            <input type="text" name="lxdh" lay-verify="required"
+                   class="layui-input" autocomplete="off" th:value="${user.lxdh}"/>
           </td>
           <th>联系人</th>
           <td>
-            <input type="text" name="lxr" lay-verify="required" placeholder=""
-                   class="layui-input" th:value="${user.lxr}"/>
+            <input type="text" name="lxr" lay-verify="required"
+                   class="layui-input" autocomplete="off" th:value="${user.lxr}"/>
           </td>
         </tr>
         </tbody>
       </table>
-      <input type="hidden" name="roleType" class="layui-input" th:value="1"/>
+      <input type="hidden" name="roleType" th:value="1"/>
       <input type="hidden" name="fk_xtglid" th:value="${user.fk_xtglid}">
       <input type="hidden" name="id" th:value="${user.id}">
     </div>
@@ -76,8 +76,6 @@
 <script type="text/javascript" th:src="@{/static/js/citys.js}"></script>
 
 <script th:inline="javascript">
-  const cYhType = [[${cuser.yhType}]];
-
   layui.config({
     base: ctx + 'static/js/layuiExts/'
   }).use(['element', 'laydate', 'table', 'form'], function () {

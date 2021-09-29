@@ -16,6 +16,7 @@ function aeZd(data, type, indexOut) {
       return false;
     },
     error: function (XMLHttpRequest, textStatus, errorThrown) {
+      top.layer.close(loadi); //关闭弹出框
       top.layer.msg(XMLHttpRequest.responseJSON.msg);
       return false;
     }

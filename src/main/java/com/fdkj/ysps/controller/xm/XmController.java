@@ -1,5 +1,6 @@
 package com.fdkj.ysps.controller.xm;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fdkj.ysps.api.model.system.User;
 import com.fdkj.ysps.api.model.system.Zd;
@@ -11,21 +12,16 @@ import com.fdkj.ysps.api.util.XmApi;
 import com.fdkj.ysps.base.CusResponseBody;
 import com.fdkj.ysps.base.Page;
 import com.fdkj.ysps.config.BusConfig;
-import com.fdkj.ysps.config.ServerConfig;
 import com.fdkj.ysps.constant.Constants;
 import com.fdkj.ysps.controller.BaseController;
 import com.fdkj.ysps.error.BusinessException;
 import com.fdkj.ysps.utils.DateUtils;
 import com.fdkj.ysps.utils.file.FileUploadUtils;
-import com.fdkj.ysps.utils.file.FileUtils;
-import com.fdkj.ysps.utils.uuid.IdUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -53,8 +48,6 @@ public class XmController extends BaseController {
     private XmApi xmApi;
     @Autowired
     private DictApi dictApi;
-    @Autowired
-    private ServerConfig serverConfig;
 
     /**
      * 跳转
@@ -103,7 +96,7 @@ public class XmController extends BaseController {
         dictParams.put("fid", Constants.Dict.xmxz);
         List<Zd> dict_xmxz = dictApi.getZdList(request, dictParams);
         request.setAttribute("dict_xmxz", dict_xmxz);
-        return new ModelAndView("xmMgr/xm_add1");
+        return new ModelAndView("xmMgr/xm_add");
     }
 
     /**
@@ -118,7 +111,44 @@ public class XmController extends BaseController {
     public ModelAndView toEdit(HttpServletRequest request, @PathVariable String id) throws Exception {
         request.setAttribute("cuser", xmApi.getUserFromCookie(request));
         request.setAttribute("id", id);
+        //获取字典信息
+        //项目分类
+        Map<String, Object> dictParams = new HashMap<>();
+        dictParams.put("fid", Constants.Dict.xmfl);
+        List<Zd> dict_xmfl = dictApi.getZdList(request, dictParams);
+        request.setAttribute("dict_xmfl", dict_xmfl);
+        dictParams.clear();
+        //项目性质
+        dictParams.put("fid", Constants.Dict.xmxz);
+        List<Zd> dict_xmxz = dictApi.getZdList(request, dictParams);
+        request.setAttribute("dict_xmxz", dict_xmxz);
         return new ModelAndView("xmMgr/xm_edit");
+    }
+
+    /**
+     * 跳转到编辑页面
+     *
+     * @param request req
+     * @param id      项目id
+     * @return res
+     * @throws Exception err
+     */
+    @RequestMapping("toInfo/{id}")
+    public ModelAndView toInfo(HttpServletRequest request, @PathVariable String id) throws Exception {
+        request.setAttribute("cuser", xmApi.getUserFromCookie(request));
+        request.setAttribute("id", id);
+        //获取字典信息
+        //项目分类
+        Map<String, Object> dictParams = new HashMap<>();
+        dictParams.put("fid", Constants.Dict.xmfl);
+        List<Zd> dict_xmfl = dictApi.getZdList(request, dictParams);
+        request.setAttribute("dict_xmfl", dict_xmfl);
+        dictParams.clear();
+        //项目性质
+        dictParams.put("fid", Constants.Dict.xmxz);
+        List<Zd> dict_xmxz = dictApi.getZdList(request, dictParams);
+        request.setAttribute("dict_xmxz", dict_xmxz);
+        return new ModelAndView("xmMgr/xm_info");
     }
 
     /**
@@ -198,7 +228,7 @@ public class XmController extends BaseController {
     @ResponseBody
     public ResponseEntity<CusResponseBody> getDetail(HttpServletRequest request, @PathVariable String id) {
         try {
-            Xm xmDetail = xmApi.getXmDetail(request, id);
+            JSONObject xmDetail = xmApi.getXmDetail(request, id);
             //构造返回数据
             CusResponseBody cusResponseBody = CusResponseBody.success("获取项目详情成功", xmDetail);
             return new ResponseEntity<>(cusResponseBody, HttpStatus.OK);
@@ -220,31 +250,46 @@ public class XmController extends BaseController {
     public ResponseEntity<CusResponseBody> aeXm(HttpServletRequest request,
                                                 @RequestBody JSONObject json) {
         try {
-            User user = xmApi.getUserFromCookie(request);
+            User cuser = xmApi.getUserFromCookie(request);
             String dateToStr = DateUtils.parseDateToStr("yyyy-MM-dd'T'HH:mm:ss.sss", new Date());
 
+            //项目基本信息
+            Xm model = json.getObject("model", Xm.class);
+            //项目附件
+            List<XmFj> fjList = json.getJSONArray("list").toJavaList(XmFj.class);
+
             //判断项目名称是否存在
-            String xmmc = json.getString("xmmc");
-            //更具项目名称请求数据
-            JSONObject toReqJson = new Xm().setXmmc(xmmc).toReqJson();
-            List<Xm> xmListAll = xmApi.getXmListAll(request, null, toReqJson);
-            if (xmListAll != null && !xmListAll.isEmpty()) {
-                for (Xm xm : xmListAll) {
-                    if (xm.getXmmc().equals(xmmc) && !xm.getId().equals(json.getString("id"))) {
-                        throw new BusinessException("项目名称已存在", HttpStatus.BAD_REQUEST.value());
-                    }
+            boolean res = checkXmmc(request, model.getXmmc(), model.getId());
+            if (!res) {
+                throw new BusinessException("项目名称已存在", HttpStatus.BAD_REQUEST.value());
+            }
+
+            if (StringUtils.isBlank(model.getFk_xtglid())) {
+                model.setFk_xtglid(cuser.getFk_xtglid());
+            }
+            if (StringUtils.isBlank(model.getAddtime())) {
+                model.setAddtime(dateToStr);
+            }
+            if (StringUtils.isBlank(model.getWtsj())) {
+                model.setWtsj(dateToStr);
+            } else {
+                model.setWtsj(DateUtils.parseDateToStr("yyyy-MM-dd'T'HH:mm:ss.sss", DateUtils.dateTime("yyyy-MM-dd", model.getWtsj())));
+            }
+
+            if (fjList != null && !fjList.isEmpty()) {
+                for (XmFj xmFj : fjList) {
+                    //xmFj.setFk_xmid(model.getId());
+                    xmFj.setFk_xtglid(cuser.getFk_xtglid());
+                    //附件id
+                    //xmFj.setId(IdUtils.randomUUID());
                 }
             }
 
-            if (StringUtils.isBlank(json.getString("id"))) {
-                json.put("id", IdUtils.randomUUID());
-            }
-            if (StringUtils.isBlank(json.getString("addtime"))) {
-                json.put("addtime", dateToStr);
-            }
-            String wtsj = json.getString("wtsj");
-            json.put("wtsj", DateUtils.parseDateToStr("yyyy-MM-dd'T'HH:mm:ss.sss", DateUtils.dateTime("yyyy-MM-dd", wtsj)));
-            xmApi.aeXm(request, json);
+            JSONObject jsonReq = new JSONObject();
+            jsonReq.put("model", JSONObject.parseObject(JSONObject.toJSONString(model)));
+            jsonReq.put("list", JSONArray.parseArray(JSONArray.toJSONString(fjList)));
+
+            xmApi.aeXm(request, jsonReq);
             //构造返回数据
             CusResponseBody cusResponseBody = CusResponseBody.success("更新项目成功");
             return new ResponseEntity<>(cusResponseBody, HttpStatus.OK);
@@ -255,29 +300,23 @@ public class XmController extends BaseController {
     }
 
     /**
-     * 下载附件
+     * 删除项目
      *
-     * @param fileName 文件名称
-     * @param delete   是否删除
+     * @param request req
+     * @param id      项目id
+     * @return res
      */
-    @RequestMapping("download")
-    public void downloadFile(HttpServletRequest request, HttpServletResponse response,
-                             @RequestParam("fileName") String fileName, @RequestParam("delete") Boolean delete) {
+    @RequestMapping("delXm/{id}")
+    @ResponseBody
+    public ResponseEntity<CusResponseBody> del(HttpServletRequest request, @PathVariable String id) {
         try {
-            if (!FileUtils.checkAllowDownload(fileName)) {
-                throw new Exception("文件名称" + fileName + "非法，不允许下载。 ");
-            }
-            String realFileName = System.currentTimeMillis() + fileName.substring(fileName.indexOf("_") + 1);
-            String filePath = BusConfig.getDownLoadBaseDir() + File.separator + fileName;
-            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-            FileUtils.setAttachmentResponseHeader(response, realFileName);
-            FileUtils.writeBytes(filePath, response.getOutputStream());
-            if (delete) {
-                FileUtils.deleteFile(filePath);
-            }
+            xmApi.delXm(request, id.trim());
+            //构造返回数据
+            CusResponseBody cusResponseBody = CusResponseBody.success("删除项目成功");
+            return new ResponseEntity<>(cusResponseBody, HttpStatus.OK);
         } catch (Exception e) {
-            log.error("下载文件失败", e);
-            throw new BusinessException("下载文件失败", HttpStatus.INTERNAL_SERVER_ERROR.value(), e);
+            log.error("删除项目失败", e);
+            throw new BusinessException("删除项目失败: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), e);
         }
     }
 
@@ -309,6 +348,44 @@ public class XmController extends BaseController {
         } catch (Exception e) {
             log.error("上传失败", e);
             throw new BusinessException("上传失败: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), e);
+        }
+    }
+
+    /**
+     * 检查项目名称是否存在(true 不存在 false 存在)
+     *
+     * @param request req
+     * @param xmmc    项目名称
+     * @return res
+     */
+    private boolean checkXmmc(HttpServletRequest request, String xmmc, String id) throws Exception {
+        boolean res = true;
+        //更具项目名称请求数据
+        JSONObject toReqJson = new Xm().setXmmc(xmmc).toReqJson();
+        List<Xm> xmListAll = xmApi.getXmListAll(request, null, toReqJson);
+        if (xmListAll != null && !xmListAll.isEmpty()) {
+            for (Xm xm : xmListAll) {
+                if (xm.getXmmc().equals(xmmc) && !xm.getId().equals(id)) {
+                    res = false;
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+
+
+    @RequestMapping("tjXm/{id}")
+    @ResponseBody
+    public ResponseEntity<CusResponseBody> tj(HttpServletRequest request, @PathVariable String id) {
+        try {
+            xmApi.tjXm(request, id);
+            //构造返回数据
+            CusResponseBody cusResponseBody = CusResponseBody.success("提交成功");
+            return new ResponseEntity<>(cusResponseBody, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("提交失败", e);
+            throw new BusinessException("提交失败: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), e);
         }
     }
 }

@@ -20,5 +20,13 @@ const XMFJ = {
       }
     });
     return false;
+  },
+  //下载项目附件
+  downloadXmfj: function(path, name) {
+    let dUrl = ctx + "common/download/upload?resource=" + path;
+    if(name) {
+      dUrl += "&name=" + name;
+    }
+    window.open(dUrl);
   }
 };

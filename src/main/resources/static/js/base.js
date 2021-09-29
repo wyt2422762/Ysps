@@ -60,7 +60,6 @@ const CommonDownloadUpload = {
   }
 }
 
-
 const STRING = {
   //字符串格式化(%s )
   sprintf: function (str) {
@@ -80,33 +79,6 @@ const STRING = {
       return "";
     }
     return str;
-  }
-}
-
-const DRAWER = {
-  //构造字符串
-  buildContent: function (workHistoryList) {
-    if(!workHistoryList || workHistoryList.length <= 0) {
-      return "<div>无数据</div>";
-    }
-    let content = "<div style='padding: 10px;'><ul class=\"layui-timeline\">";
-    for (let index in workHistoryList) {
-      let workHistory = workHistoryList[index];
-      content += "<li class=\"layui-timeline-item\">";
-      content += "<i class=\"layui-icon layui-timeline-axis\"></i>";
-      content += "<div class=\"layui-timeline-content layui-text\">";
-      content += "<h3 class=\"layui-timeline-title\">" + dayjs(workHistory.spsj).format("YYYY-MM-DD HH:mm:ss") + "&nbsp;&nbsp;&nbsp;&nbsp;" + workHistory.czmc + "</h3>";
-      content += "<p>";
-      content += "操作人: " + workHistory.user.username;
-      content += "</p>";
-      content += "<p>";
-      content += "意见: " + workHistory.yj;
-      content += "</p>";
-      content += "</div>";
-      content += "</li>";
-    }
-    content += "</ul></div>";
-    return content;
   }
 }
 

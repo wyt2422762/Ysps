@@ -164,7 +164,7 @@ public class XmApi extends BaseApi {
      * @param id      项目id
      * @return res
      */
-    public Xm getXmDetail(HttpServletRequest request, String id) throws Exception {
+    public JSONObject getXmDetail(HttpServletRequest request, String id) throws Exception {
         //请求头
         HttpHeaders headers = getHttpHeaders(request);
         //请求体
@@ -187,14 +187,14 @@ public class XmApi extends BaseApi {
 
         boolean success = jsonObject.getBooleanValue("Success");
         if (!success) {
-            logger.error("获取用户详情失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_Model");
-            logger.error("获取用户详情失败，请求体: " + body.toJSONString());
-            logger.error("获取用户详情失败，请求参数: " + params);
-            logger.error("获取用户详情失败，返回内容: " + responseEntityBody);
+            logger.error("获取项目详情失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_Model");
+            logger.error("获取项目详情失败，请求体: " + body.toJSONString());
+            logger.error("获取项目详情失败，请求参数: " + params);
+            logger.error("获取项目详情失败，返回内容: " + responseEntityBody);
             throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
 
-        return jsonObject.getJSONObject("Results").toJavaObject(Xm.class);
+        return jsonObject.getJSONObject("Results");
     }
 
     /**
@@ -218,6 +218,64 @@ public class XmApi extends BaseApi {
             logger.error("更新添加项目失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_Update");
             logger.error("更新添加项目失败，请求体: " + body.toJSONString());
             logger.error("更新添加项目失败，返回内容: " + responseEntityBody);
+            throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    /**
+     * 删除项目
+     *
+     * @param request req
+     * @param id    项目id
+     */
+    public void delXm(HttpServletRequest request, String id) {
+        //请求头
+        HttpHeaders headers = getHttpHeaders(request);
+        //组装请求体
+        HttpEntity<JSONObject> requestEntity = new HttpEntity<>(null, headers);
+        //参数
+        Map<String, String> params = new HashMap<>(1);
+        params.put("id", id);
+        //请求
+        ResponseEntity<String> responseEntity =
+                restTemplate.exchange(baseUrl + "/api/CZF/YS_XMXX_Del?id={id}",
+                        HttpMethod.POST, requestEntity, String.class, params);
+        String responseEntityBody = responseEntity.getBody();
+        JSONObject jsonObject = JSONObject.parseObject(responseEntityBody);
+        boolean success = jsonObject.getBooleanValue("Success");
+        if (!success) {
+            logger.error("删除项目失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_Del");
+            logger.error("删除项目失败，请求参数: " + params);
+            logger.error("删除项目失败，返回内容: " + responseEntityBody);
+            throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    /**
+     * 提交项目
+     *
+     * @param request req
+     * @param id    项目id
+     */
+    public void tjXm(HttpServletRequest request, String id) {
+        //请求头
+        HttpHeaders headers = getHttpHeaders(request);
+        //组装请求体
+        HttpEntity<JSONObject> requestEntity = new HttpEntity<>(null, headers);
+        //参数
+        Map<String, String> params = new HashMap<>(1);
+        params.put("id", id);
+        //请求
+        ResponseEntity<String> responseEntity =
+                restTemplate.exchange(baseUrl + "/api/CZF/YS_XMXX_TJ?id={id}",
+                        HttpMethod.POST, requestEntity, String.class, params);
+        String responseEntityBody = responseEntity.getBody();
+        JSONObject jsonObject = JSONObject.parseObject(responseEntityBody);
+        boolean success = jsonObject.getBooleanValue("Success");
+        if (!success) {
+            logger.error("提交项目失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_TJ");
+            logger.error("提交项目失败，请求参数: " + params);
+            logger.error("提交项目失败，返回内容: " + responseEntityBody);
             throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }

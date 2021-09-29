@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/common/header::header(~{::title},~{},~{})">
+  <title>预算评审系统-编辑方案</title>
+</head>
+<body>
+<div class="layui-fluid">
+  <div class="layui-card" style="box-shadow: none;">
+    <div class="layui-card-body">
+      <div class="layui-carousel" id="stepForm" lay-filter="stepForm" style="margin: 0 auto;">
+        <div carousel-item style="overflow: visible;">
+          <div>
+            <form class="layui-form" method="post" id="xm_Form_basic" lay-filter="xm_Form_basic">
+              <div class="layui-form-item">
+                <table class="layui-table" lay-size="xm">
+                  <tr>
+                    <th style="white-space: nowrap;">项目编号</th>
+                    <td>
+                      <input type="text" readonly id="xmbh" name="xmbh" class="layui-input"/>
+                    </td>
+                    <th style="white-space: nowrap;">项目名称</th>
+                    <td>
+                      <input type="text" readonly name="xmmc" class="layui-input"/>
+                    </td>
+                    <th style="white-space: nowrap;">项目分类</th>
+                    <td>
+                      <!--<input type="text" name="xmfl_zd"  class="layui-input"/>-->
+                      <select name="xmfl_zd" id="xmfl_zd" disabled>
+                        <option value="" selected>请选择项目分类</option>
+                        <option th:each="zd,stat:${dict_xmfl}" th:value="${zd.zdz}"
+                                th:text="${zd.zdm}"></option>
+                      </select>
+                    </td>
+                    <th style="white-space: nowrap;">项目性质</th>
+                    <td>
+                      <!--<input type="text" name="xmxz_zd"  class="layui-input"/>-->
+                      <select name="xmxz_zd" id="xmxz_zd" disabled>
+                        <option value="" selected>请选择项目性质</option>
+                        <option th:each="zd,stat:${dict_xmxz}" th:value="${zd.zdz}"
+                                th:text="${zd.zdm}"></option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style="white-space: nowrap;">委托时间</th>
+                    <td>
+                      <input type="text" readonly name="wtsj" class="layui-input"/>
+                    </td>
+                    <th style="white-space: nowrap;">委托金额</th>
+                    <td>
+                      <input type="number" readonly name="wtje" class="layui-input"/>
+                    </td>
+                    <th style="white-space: nowrap;">联系人</th>
+                    <td>
+                      <input type="text" readonly name="lxr" class="layui-input"/>
+                    </td>
+                    <th style="white-space: nowrap;">联系方式</th>
+                    <td>
+                      <input type="text" readonly name="lxfs" class="layui-input"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style="white-space: nowrap;">项目实施单位</th>
+                    <td colspan="2">
+                      <input type="text" readonly name="xmssdw" class="layui-input"/>
+                    </td>
+                    <th style="white-space: nowrap;">建设内容</th>
+                    <td colspan="4">
+                      <textarea name="jsbr" readonly class="layui-textarea"></textarea>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style="white-space: nowrap;">评审目标及要求</th>
+                    <td colspan="7">
+                      <textarea name="psmbjyq" readonly class="layui-textarea"></textarea>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th style="white-space: nowrap;">评审结果使用方向</th>
+                    <td colspan="7">
+                      <textarea name="psmbjyq" readonly class="layui-textarea"></textarea>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div class="layui-form-item">
+                <div class="">
+                  <button class="layui-btn" lay-submit lay-filter="xm_Form_basic">
+                    &emsp;下一步&emsp;
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div>
+            <form class="layui-form" method="post" id="xm_Form_fj">
+
+              <fieldset class="layui-elem-field layui-field-title">
+                <legend>资金来源</legend>
+              </fieldset>
+
+              <div class="layui-upload">
+                <div class="layui-upload-list">
+                  <table class="layui-table">
+                    <tbody id="fileList_zjly"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+                <legend>立项文件</legend>
+              </fieldset>
+
+              <div class="layui-upload">
+                <div class="layui-upload-list">
+                  <table class="layui-table">
+                    <tbody id="fileList_lxwj"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+                <legend>政府审批意见（会员纪要）</legend>
+              </fieldset>
+
+              <div class="layui-upload">
+                <div class="layui-upload-list">
+                  <table class="layui-table">
+                    <tbody id="fileList_spyj"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+                <legend>其他</legend>
+              </fieldset>
+
+              <div class="layui-upload">
+                <div class="layui-upload-list">
+                  <table class="layui-table">
+                    <tbody id="fileList_qt"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <hr/>
+
+              <div class="layui-form-item">
+                <div style="padding-bottom: 10px;">
+                  <button type="button" class="layui-btn layui-btn-primary pre">上一步</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div style="clear: both;"></div>
+</div>
+
+<div th:replace="/common/footer::footer()"></div>
+
+<script type="text/javascript" th:src="@{/static/js/xm/xm.js}"></script>
+<script type="text/javascript" th:src="@{/static/js/xm/xmfj.js}"></script>
+
+<script th:inline="javascript">
+  const cuser = [[${cuser}]];
+  const id = [[${id}]];
+
+  layui.config({
+    base: ctx + 'static/js/layuiExts/'
+  }).extend({
+    step: 'step/step-lay/step'
+  }).use(['element', 'laydate', 'table', 'form', 'step', 'upload'], function () {
+    let element = layui.element;
+    let laydate = layui.laydate;
+    let form = layui.form;
+    let table = layui.table;
+    let step = layui.step;
+    //let upload = layui.upload;
+
+    //分布
+    step.render({
+      elem: '#stepForm',
+      filter: 'stepForm',
+      width: '100%', //设置容器宽度
+      stepWidth: '750px',
+      stepItems: [{
+        title: '基础信息'
+      }, {
+        title: '附件'
+      }]
+    });
+
+    //基础信息
+    form.on('submit(xm_Form_basic)', function (data) {
+      //项目model信息
+      let model = {};
+      for (let key in data.field) {
+        let val = data.field[key];
+        if (val) {
+          model[key] = val;
+        }
+      }
+      //项目状态
+      model.zt = XM.XMZT.DTJ;
+
+      xm.model = model;
+      //下一步
+      step.next('#stepForm');
+      return false;
+    });
+
+    //附件
+    form.on('submit(xm_Form_fj)', function (data) {
+      //保存项目
+      XM.saveXm(xm, function () {
+        //下一步
+        step.next('#stepForm');
+        return false;
+      });
+      return false;
+    });
+
+    //上一步
+    $('.pre').click(function () {
+      step.pre('#stepForm');
+    });
+    //下一步
+    $('.next').click(function () {
+      step.next('#stepForm');
+    });
+
+    //项目
+    let xm = {
+      model: {},
+      list: []
+    };
+
+    //获取项目详情
+    getXm(id);
+
+    //获取项目信息
+    function getXm(id) {
+      XM.getXm(id, function (data) {
+        xm = data.data;
+        //1. 处理基本信息
+        form.val("xm_Form_basic", xm.model);
+        //2. 处理附件
+        let fjList = xm.list;
+        if (fjList) {
+          for(let i = 0; i < fjList.length; i++) {
+            let xmfj = fjList[i];
+
+            let tr = $(['<tr>',
+              '<td>' + xmfj.fjmc + '</td>',
+              '<td>',
+              "<button data-fjmc='" + xmfj.fjmc + "' data-fjdz='" + xmfj.fjdz + "' class='layui-btn layui-btn-xs fj-download'>下载</button>",
+              "<button data-fjmc='" + xmfj.fjmc + "' data-fjdz='" + xmfj.fjdz + "' class='layui-btn layui-btn-xs layui-btn-danger fj-delete'>删除</button>",
+              '</td>',
+              '</tr>'].join(''));
+
+            if("资金来源" == xmfj.fjlx_zd) {
+              $("#fileList_zjly").append(tr);
+            } else if("立项文件" == xmfj.fjlx_zd){
+              $("#fileList_lxwj").append(tr);
+            } else if("政府审批意见（会员纪要）" == xmfj.fjlx_zd){
+              $("#fileList_spyj").append(tr);
+            } else if("其他" == xmfj.fjlx_zd){
+              $("#fileList_qt").append(tr);
+            }
+          }
+        }
+        return false;
+      });
+      return false;
+    }
+
+  });
+</script>
+</body>
+</html>

@@ -20,21 +20,25 @@
           <div class="layui-form-item">
             <div class="layui-inline">
               <div class="layui-input-inline">
-                <input type="number" name="wtstartje" lay-verify="cnumber" placeholder="起始委托金额￥" autocomplete="off" class="layui-input">
+                <input type="number" name="wtstartje" lay-verify="cnumber" placeholder="起始委托金额￥" autocomplete="off"
+                       class="layui-input">
               </div>
               <div class="layui-form-mid">-</div>
               <div class="layui-input-inline">
-                <input type="number" name="wtendje" lay-verify="cnumber" placeholder="结束委托金额￥" autocomplete="off" class="layui-input">
+                <input type="number" name="wtendje" lay-verify="cnumber" placeholder="结束委托金额￥" autocomplete="off"
+                       class="layui-input">
               </div>
             </div>
 
             <div class="layui-inline">
               <div class="layui-input-inline">
-                <input type="text" readonly name="wtstarttime" placeholder="起始委托时间" autocomplete="off" class="layui-input">
+                <input type="text" readonly name="wtstarttime" placeholder="起始委托时间" autocomplete="off"
+                       class="layui-input">
               </div>
               <div class="layui-form-mid">-</div>
               <div class="layui-input-inline">
-                <input type="text" readonly name="wtendtime" placeholder="结束委托时间" autocomplete="off" class="layui-input">
+                <input type="text" readonly name="wtendtime" placeholder="结束委托时间" autocomplete="off"
+                       class="layui-input">
               </div>
             </div>
           </div>
@@ -88,12 +92,15 @@
       <table id="xmTable" class="layui-table" lay-filter="xmTable"></table>
 
       <script type="text/html" id="xmTableToolBar">
-        <a th:if="${#lists.contains(opts, 'show')}" class="layui-btn layui-btn-xs" lay-event="mx">明细</a>
-        {{#  if('审核通过' == d.zt){ }}
-        <a th:if="${#lists.contains(opts, 'show')}" class="layui-btn layui-btn-normal layui-btn-xs"
-           lay-event="yf">预付</a>
-        <a th:if="${#lists.contains(opts, 'show')}" class="layui-btn layui-btn-warm layui-btn-xs"
-           lay-event="js">结算</a>
+        <a th:if="${#lists.contains(opts, 'show')}" class="layui-btn layui-btn-xs"
+           lay-event="mx">详情</a>
+        {{#  if('已保存' == d.zt || '待提交' == d.zt){ }}
+        <a th:if="${#lists.contains(opts, 'update')}" class="layui-btn layui-btn-normal layui-btn-xs"
+           lay-event="edit">编辑</a>
+        <a th:if="${#lists.contains(opts, 'del')}" class="layui-btn layui-btn-danger layui-btn-xs"
+           lay-event="del">删除</a>
+        <a th:if="${#lists.contains(opts, 'add')}" class="layui-btn layui-btn-warm layui-btn-xs"
+           lay-event="tj">提交</a>
         {{#  } }}
       </script>
 
@@ -103,6 +110,8 @@
 </div>
 
 <div th:replace="/common/footer::footer()"></div>
+
+<script type="text/javascript" th:src="@{/static/js/xm/xm.js}"></script>
 
 <script th:inline="javascript">
   const cuser = [[${cuser}]];
@@ -144,10 +153,10 @@
     form.verify({
       cnumber: function (value, item) {
         let reg = new RegExp("^\\d+(?:\\.\\d{1,2})?$")
-        if(value && isNaN(value)){
+        if (value && isNaN(value)) {
           return "只能输入数字";
         }
-        if(!reg.test(value)) {
+        if (value && !reg.test(value)) {
           return "最多两位小数";
         }
       }
@@ -189,7 +198,7 @@
           {field: 'sfkpxm', title: "是否快评项目"},
           {field: 'zt', title: '项目状态'},
 
-          {toolbar: '#xmTableToolBar', align: 'center', fixed: 'right', title: '操作'}
+          {fixed: 'right', align: 'center', title: '操作', toolbar: '#xmTableToolBar', width: 250}
         ]],
         parseData: function (res) { //res 即为原始返回的数据
           return {
@@ -207,30 +216,66 @@
       let data = obj.data; //获得当前行数据
       let layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
       let tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+
+      if (layEvent === 'del') { //删除
+        top.layer.confirm('确定要删除该项目？', {
+          btn: ['确定', '取消'] //按钮
+        }, function () {
+          XM.delXm(data.id, function () {
+            window.location.reload();
+            return false;
+          });
+        }, function () {
+        });
+      } else if (layEvent === 'edit') { //编辑
+        let url = ctx + "CZF/XMGL/toEdit/" + data.id;
+        let title = '编辑项目';
+        showAeDialog(url, title, function () {
+          window.location.reload();
+        });
+      } else if (layEvent === 'mx') { //详情
+        let url = ctx + "CZF/XMGL/toInfo/" + data.id;
+        let title = '项目详情';
+        showAeDialog(url, title);
+      } else if (layEvent === 'tj') { //提交
+        top.layer.confirm('确定要提交该项目？', {
+          btn: ['确定', '取消'] //按钮
+        }, function () {
+          XM.tjXm(data.id, function () {
+            window.location.reload();
+            return false;
+          });
+        }, function () {
+        });
+      }
     });
 
     //添加按钮事件
     $("#addXm").on('click', function () {
       let url = ctx + "CZF/XMGL/toAdd";
+      let title = '添加项目';
+      showAeDialog(url, title, function () {
+        window.location.reload();
+      });
+    });
+
+    //显示弹出框
+    function showAeDialog(url, title, callBack) {
       top.layer.open({
         type: 2,
-        title: '添加项目',
+        title: title,
         closeBtn: 1,
         shadeClose: false,
         area: ['1200px', '90%'],
         content: url,
-        /*btn: ['保存', '取消'],
-        yes: function (index, layero) {
-          let body = top.layer.getChildFrame('body', index);
-          let frm = $(body).find("form#xm_Form");
-          $(frm).find("button.sb").click();
-          return false;
-        },*/
         end: function (index) {
           top.layer.close(index);
+          if(callBack) {
+            callBack();
+          }
         }
       });
-    });
+    }
 
     //搜索按钮事件
     form.on('submit(formDemo1)', function (data) {
@@ -244,25 +289,25 @@
 
       let params = {};
 
-      if(xmmc) {
+      if (xmmc) {
         params['xmmc'] = xmmc;
       }
-      if(xmssdw) {
+      if (xmssdw) {
         params['xmssdw'] = xmssdw;
       }
-      if(xmfl_zd) {
+      if (xmfl_zd) {
         params['xmfl_zd'] = xmfl_zd;
       }
-      if(wtstartje) {
+      if (wtstartje) {
         params['wtstartje'] = wtstartje;
       }
-      if(wtendje) {
+      if (wtendje) {
         params['wtendje'] = wtendje;
       }
-      if(wtstarttime) {
+      if (wtstarttime) {
         params['wtstarttime'] = wtstarttime;
       }
-      if(wtendtime) {
+      if (wtendtime) {
         params['wtendtime'] = wtendtime;
       }
 
