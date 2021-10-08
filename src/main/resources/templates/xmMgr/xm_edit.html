@@ -257,7 +257,8 @@
     //附件
     form.on('submit(xm_Form_fj)', function (data) {
       //保存项目
-      XM.saveXm(xm, function () {
+      let url = ctx + "CZF/XMGL/editXm";
+      XM.saveXm(xm, url, function () {
         //下一步
         step.next('#stepForm');
         return false;
@@ -285,6 +286,43 @@
       model: {},
       list: []
     };
+
+    //删除附件方法
+    $("tbody").on('click', 'button.fj-delete', function () {
+      debugger;
+      top.layer.confirm('确定要删除该附件？', {
+        btn: ['确定', '取消'] //按钮
+      }, function () {
+        //调用接口删除已上传的文件
+        let path = $(this).attr("data-fjdz");
+        let name = $(this).attr("data-fjmc");
+        XMFJ.delXmFj(path, function () {
+          //delete that.files[index]; //删除对应的文件
+          tr.remove();
+          uploadIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
+
+          for (let i = 0; i < xm.list.length; i++) {
+            let xmfj = (xm.list)[i];
+            if (name == xmfj.fjmc && path == xmfj.fjdz) {
+              xm.list.splice(i, 1);
+              break;
+            }
+          }
+          return false;
+        });
+      }, function () {
+      });
+
+
+      return false;
+    });
+
+    //下载附件方法
+    $("tbody").on('click', 'button.fj-download', function () {
+      debugger;
+      XMFJ.downloadXmfj(path, name);
+      return false;
+    });
 
     //获取项目详情
     getXm(id);
@@ -344,33 +382,6 @@
           //添加附件信息
           xm.list.push(xmfj);
 
-          //删除附件方法
-          tr.find('.fj-delete').on('click', function () {
-            //调用接口删除已上传的文件
-            let path = $(this).attr("data-fjdz");
-            let name = $(this).attr("data-fjmc");
-            XMFJ.delXmFj(path, function () {
-              delete that.files[index]; //删除对应的文件
-              tr.remove();
-              uploadIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
-
-              for (let i = 0; i < xm.list.length; i++) {
-                let xmfj = (xm.list)[i];
-                if (name == xmfj.fjmc && path == xmfj.fjdz) {
-                  xm.list.splice(i, 1);
-                  break;
-                }
-              }
-              return false;
-            });
-            return false;
-          });
-
-          //下载附件方法
-          tr.find('.fj-download').on('click', function () {
-            XMFJ.downloadXmfj(path, name);
-            return false;
-          });
           return false;
         },
         allDone: function (obj) { //多文件上传完毕后的状态回调

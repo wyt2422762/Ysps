@@ -215,12 +215,6 @@
 
     //附件
     form.on('submit(xm_Form_fj)', function (data) {
-      //保存项目
-      XM.saveXm(xm, function () {
-        //下一步
-        step.next('#stepForm');
-        return false;
-      });
       return false;
     });
 
@@ -258,7 +252,6 @@
               '<td>' + xmfj.fjmc + '</td>',
               '<td>',
               "<button data-fjmc='" + xmfj.fjmc + "' data-fjdz='" + xmfj.fjdz + "' class='layui-btn layui-btn-xs fj-download'>下载</button>",
-              "<button data-fjmc='" + xmfj.fjmc + "' data-fjdz='" + xmfj.fjdz + "' class='layui-btn layui-btn-xs layui-btn-danger fj-delete'>删除</button>",
               '</td>',
               '</tr>'].join(''));
 
@@ -271,6 +264,12 @@
             } else if("其他" == xmfj.fjlx_zd){
               $("#fileList_qt").append(tr);
             }
+
+            //下载附件方法
+            tr.find('.fj-download').on('click', function () {
+              XMFJ.downloadXmfj(xmfj.fjdz, xmfj.fjmc);
+              return false;
+            });
           }
         }
         return false;

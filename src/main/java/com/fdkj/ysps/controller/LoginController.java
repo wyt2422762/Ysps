@@ -1,9 +1,11 @@
 package com.fdkj.ysps.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.fdkj.ysps.annotation.Log;
 import com.fdkj.ysps.api.model.system.User;
 import com.fdkj.ysps.api.util.SystemApi;
 import com.fdkj.ysps.base.CusResponseBody;
+import com.fdkj.ysps.constant.Constants;
 import com.fdkj.ysps.error.BusinessException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,6 +31,7 @@ import java.net.URLEncoder;
  */
 @Controller
 @RequestMapping("login")
+@Log(module = "登录")
 public class LoginController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
@@ -43,6 +46,7 @@ public class LoginController {
 
     @RequestMapping("login")
     @ResponseBody
+    @Log(module = "登录", desc = "登录", optType = Constants.OptType.LOGIN)
     public ResponseEntity<CusResponseBody> login(@RequestParam("userName") String userName,
                                                  @RequestParam("password") String password,
                                                  HttpServletRequest request,
@@ -81,6 +85,7 @@ public class LoginController {
 
     @RequestMapping("logout")
     @ResponseBody
+    @Log(module = "登录", desc = "登出", optType = Constants.OptType.LOGOUT)
     public ResponseEntity<CusResponseBody> logout(HttpServletRequest request, HttpServletResponse response) {
         try {
             // 将Cookie的值设置为null

@@ -65,6 +65,7 @@
       <input type="hidden" name="roleType" th:value="1"/>
       <input type="hidden" name="fk_xtglid" th:value="${user.fk_xtglid}">
       <input type="hidden" name="id" th:value="${user.id}">
+      <input type="hidden" name="ryhg" th:value="${user.ryhg}">
     </div>
     <button style="display:none;" lay-submit lay-filter="submitBut" class="sb"></button>
   </form>
@@ -108,6 +109,8 @@
       user['username'] = data1.field.username;
 
       user['jmgxlh'] = data1.field.jmgxlh;
+
+      user['ryhg'] = data1.field.ryhg;
 
       let index = top.layer.getFrameIndex(window.name); //获取窗口索引
 

@@ -26,4 +26,79 @@ public class Constants {
          */
         public static final String xmxz = "692DF4CC-7D9E-4FDB-ACD0-79136B7C6DCF";
     }
+
+    /**
+     * 操作类型
+     */
+    public static class OptType {
+        /**
+         * 查询
+         */
+        public static final String SELECT = "查询";
+
+        /**
+         * 新增
+         */
+        public static final String ADD = "新增";
+
+        /**
+         * 编辑
+         */
+        public static final String EDIT = "编辑";
+
+        /**
+         * 删除
+         */
+        public static final String DEL = "删除";
+
+        /**
+         * 清空
+         */
+        public static final String CLEAR = "清空";
+
+        /**
+         * 导入
+         */
+        public static final String IMPORT = "导入";
+
+        /**
+         * 导出
+         */
+        public static final String EXPORT = "导出";
+
+        /**
+         * 上传
+         */
+        public static final String UPLOAD = "上传";
+
+        /**
+         * 下载
+         */
+        public static final String DOWNLOAD = "下载";
+
+        /**
+         * 删除文件
+         */
+        public static final String REMOVE = "删除文件";
+
+        /**
+         * 提交审核
+         */
+        public static final String TO_REVIEW = "提交审核";
+
+        /**
+         * 审核
+         */
+        public static final String REVIEW = "审核";
+
+        /**
+         * 登录
+         */
+        public static final String LOGIN = "登录";
+
+        /**
+         * 登出
+         */
+        public static final String LOGOUT = "登出";
+    }
 }

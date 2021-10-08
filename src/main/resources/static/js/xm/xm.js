@@ -47,17 +47,17 @@ const XM = {
       },
       error: function (XMLHttpRequest, textStatus, errorThrown) {
         top.layer.close(loadi); //关闭弹出框
-        top.layer.msg(XMLHttpRequest.responseJSON.msg);
+        top.layer.msg(XMLHttpRequest.responseJSON.msg ? XMLHttpRequest.responseJSON.msg : "操作失败!");
         return false;
       }
     });
     return false;
   },
   //保存项目
-  saveXm: function (xm, callBack) {
+  saveXm: function (xm, url, callBack) {
     let loadi = top.layer.load();
     $.ajax({
-      url: ctx + "CZF/XMGL/aeXm",
+      url: url,
       type: "POST",
       dataType: "json",
       contentType: "application/json;charset=utf-8",
@@ -72,7 +72,7 @@ const XM = {
       },
       error: function (XMLHttpRequest, textStatus, errorThrown) {
         top.layer.close(loadi); //关闭弹出框
-        top.layer.msg(XMLHttpRequest.responseJSON.msg);
+        top.layer.msg(XMLHttpRequest.responseJSON.msg ? XMLHttpRequest.responseJSON.msg : "操作失败!");
         return false;
       }
     });
@@ -104,6 +104,27 @@ const XM = {
     $.ajax({
       url: ctx + "CZF/XMGL/tjXm/" + id,
       type: "POST",
+      success: function (data) {
+        top.layer.close(loadi); //关闭弹出框
+        top.layer.msg(data.msg);
+        if(callBack){
+          callBack();
+        }
+      },
+      error: function (XMLHttpRequest, textStatus, errorThrown) {
+        top.layer.close(loadi); //关闭弹出框
+        top.layer.msg(XMLHttpRequest.responseJSON.msg ? XMLHttpRequest.responseJSON.msg : "操作失败!");
+      }
+    });
+    return false;
+  },
+  //审核项目1
+  reviewXm1: function(param, callBack) {
+    let loadi = top.layer.load();
+    $.ajax({
+      url: ctx + "CZF/XMGL/reviewXm",
+      type: "POST",
+      data: param,
       success: function (data) {
         top.layer.close(loadi); //关闭弹出框
         top.layer.msg(data.msg);

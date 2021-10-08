@@ -3,6 +3,7 @@ package com.fdkj.ysps.api.util;
 import com.alibaba.fastjson.JSONObject;
 import com.fdkj.ysps.api.model.system.User;
 import com.fdkj.ysps.api.model.xm.Xm;
+import com.fdkj.ysps.api.model.xm.XmReview;
 import com.fdkj.ysps.base.Page;
 import com.fdkj.ysps.error.BusinessException;
 import org.slf4j.Logger;
@@ -276,6 +277,36 @@ public class XmApi extends BaseApi {
             logger.error("提交项目失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_TJ");
             logger.error("提交项目失败，请求参数: " + params);
             logger.error("提交项目失败，返回内容: " + responseEntityBody);
+            throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    /**
+     * 审核项目
+     * @param request req
+     * @param xmReview 项目审核参数
+     */
+    public void reviewXm(HttpServletRequest request, XmReview xmReview) {
+        //请求头
+        HttpHeaders headers = getHttpHeaders(request);
+        //组装请求体
+        HttpEntity<JSONObject> requestEntity = new HttpEntity<>(null, headers);
+        //参数
+        Map<String, String> params = new HashMap<>(3);
+        params.put("id", xmReview.getId());
+        params.put("tj", xmReview.getTj());
+        params.put("nr", xmReview.getNr());
+        //请求
+        ResponseEntity<String> responseEntity =
+                restTemplate.exchange(baseUrl + "/api/CZF/YS_XMXX_SH?id={id}&tj={tj}&nr={nr}",
+                        HttpMethod.POST, requestEntity, String.class, params);
+        String responseEntityBody = responseEntity.getBody();
+        JSONObject jsonObject = JSONObject.parseObject(responseEntityBody);
+        boolean success = jsonObject.getBooleanValue("Success");
+        if (!success) {
+            logger.error("审核项目失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_SH");
+            logger.error("审核项目失败，请求参数: " + params);
+            logger.error("审核项目失败，返回内容: " + responseEntityBody);
             throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }

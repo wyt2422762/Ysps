@@ -81,7 +81,7 @@
         </form>
         <div class="clearfix"></div>
 
-        <div class="layui-inline">
+        <div class="layui-inline" th:if="${zt == '待提交'}">
           <button th:if="${#lists.contains(opts, 'add')}" id="addXm" class="layui-btn layui-btn-normal"
                   style="margin-left:15px;">新建项目
           </button>
@@ -102,6 +102,12 @@
         <a th:if="${#lists.contains(opts, 'add')}" class="layui-btn layui-btn-warm layui-btn-xs"
            lay-event="tj">提交</a>
         {{#  } }}
+
+        <a th:if="${'待审核' == zt && #lists.contains(opts, 'update')}" class="layui-btn layui-btn-warm layui-btn-xs"
+           lay-event="ty">同意</a>
+        <a th:if="${'待审核' == zt && #lists.contains(opts, 'update')}" class="layui-btn layui-btn-normal layui-btn-xs"
+           lay-event="th">退回</a>
+
       </script>
 
     </div>
@@ -116,6 +122,7 @@
 <script th:inline="javascript">
   const cuser = [[${cuser}]];
   const opts = [[${opts}]];
+  const zt = [[${zt}]];
 
   layui.config({
     base: ctx + 'static/js/layuiExts/'
@@ -162,7 +169,7 @@
       }
     });
 
-    getTableData();
+    getInitData();
 
     //获取方案管理列表
     function getTableData(params) {
@@ -247,6 +254,22 @@
           });
         }, function () {
         });
+      } else if (layEvent === 'ty') { //审核-通过
+        let url = ctx + "CZF/XMGL/toReview1/" + data.id;
+        let title = "通过项目";
+        showReviewDialog1(url, title, function (index){
+          let body = top.layer.getChildFrame('body', index);
+          let frm = $(body).find("form#review_Form");
+          $(frm).find("button.ty").click();
+        });
+      } else if (layEvent === 'th') { //审核-退回
+        let url = ctx + "CZF/XMGL/toReview1/" + data.id;
+        let title = "退回项目";
+        showReviewDialog1(url, title, function (index){
+          let body = top.layer.getChildFrame('body', index);
+          let frm = $(body).find("form#review_Form");
+          $(frm).find("button.th").click();
+        });
       }
     });
 
@@ -259,7 +282,7 @@
       });
     });
 
-    //显示弹出框
+    //显示添加修改弹出框
     function showAeDialog(url, title, callBack) {
       top.layer.open({
         type: 2,
@@ -270,9 +293,33 @@
         content: url,
         end: function (index) {
           top.layer.close(index);
-          if(callBack) {
+          if (callBack) {
             callBack();
           }
+        }
+      });
+    }
+
+    //显示审核弹出框1
+    function showReviewDialog1(url, title, callBack) {
+      top.layer.open({
+        type: 2,
+        title: title,
+        closeBtn: 1,
+        shadeClose: false,
+        area: ['600px', '320px'],
+        content: url,
+        btn: ['确定', '取消'],
+        yes: function(index){
+          debugger;
+          if(callBack) {
+            callBack(index);
+          }
+          return false;
+        },
+        btn2: function(index){
+          top.layer.close(index);
+          return false;
         }
       });
     }
@@ -310,11 +357,24 @@
       if (wtendtime) {
         params['wtendtime'] = wtendtime;
       }
+      if (zt) {
+        params['zt'] = zt;
+      }
 
       getTableData(params);
       return false;
     });
 
+    //获取初始数据
+    function getInitData() {
+      debugger;
+      let params = {};
+      if (zt) {
+        params['zt'] = zt;
+      }
+      getTableData(params);
+      return false;
+    }
   });
 </script>
 </body>

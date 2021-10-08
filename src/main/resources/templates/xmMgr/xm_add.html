@@ -253,7 +253,8 @@
     //附件
     form.on('submit(xm_Form_fj)', function (data) {
       //保存项目
-      XM.saveXm(xm, function () {
+      let url = ctx + "CZF/XMGL/addXm";
+      XM.saveXm(xm, url, function () {
         //下一步
         step.next('#stepForm');
         return false;

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/common/header::header(~{::title},~{},~{})">
+  <title>预算评审系统-方案审核</title>
+</head>
+<body>
+<div class="layui-tab-item layui-show" style="padding: 10px;">
+  <div id="LAY_preview">
+    <form class="layui-form" method="post" id="review_Form">
+      <div class="layui-form">
+        <div class="layui-form-item layui-form-text">
+          <label class="layui-form-label">审核意见</label>
+          <div class="layui-input-block">
+            <textarea lay-verify="required" name="nr" placeholder="请输入审核意见" class="layui-textarea"></textarea>
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <div class="layui-input-block">
+            <button style="display:none;" class="layui-btn ty" lay-submit lay-filter="ty">同意</button>
+            <button style="display:none;" class="layui-btn layui-btn-primary th" lay-submit lay-filter="th">退回</button>
+          </div>
+        </div>
+      </div>
+      <input type="hidden" name="id" th:value="${id}"/>
+    </form>
+  </div>
+</div>
+
+<div th:replace="/common/footer::footer()"></div>
+
+<script type="text/javascript" th:src="@{/static/js/xm/xm.js}"></script>
+
+<script th:inline="javascript">
+  const id = [[${id}]];
+  layui.use(['element', 'laydate', 'table', 'form'], function () {
+    //let element = layui.element;
+    //let laydate = layui.laydate;
+    let form = layui.form;
+    //let table = layui.table;
+
+    //监听提交
+    form.on('submit(ty)', function(data){
+      top.layer.confirm('确定要通过该项目？', {
+        btn: ['确定', '取消'] //按钮
+      }, function (index) {
+        let params = {};
+        for (let key in data.field) {
+          let val = data.field[key];
+          if (val) {
+            params[key] = val;
+          }
+        }
+        params["tj"] = "同意";
+        XM.reviewXm1(params, function () {
+          let indexout = top.layer.getFrameIndex(window.name); //获取窗口索引
+          top.layer.close(indexout); //关闭弹出框
+          TAB.refreshLayerOpen();
+          return false;
+        });
+      }, function (index) {
+        let indexout = top.layer.getFrameIndex(window.name); //获取窗口索引
+        top.layer.close(indexout); //关闭弹出框
+      });
+      return false;
+    });
+
+    form.on('submit(th)', function(data){
+      debugger;
+      top.layer.confirm('确定要退回该项目？', {
+        btn: ['确定', '取消'] //按钮
+      }, function () {
+        let params = {};
+        for (let key in data.field) {
+          let val = data.field[key];
+          if (val) {
+            params[key] = val;
+          }
+        }
+        params["tj"] = "退回";
+        XM.reviewXm1(params, function () {
+          let indexout = top.layer.getFrameIndex(window.name); //获取窗口索引
+          top.layer.close(indexout); //关闭弹出框
+          TAB.refreshLayerOpen();
+          return false;
+        });
+      }, function () {
+        let indexout = top.layer.getFrameIndex(window.name); //获取窗口索引
+        top.layer.close(indexout); //关闭弹出框
+      });
+      return false;
+    });
+
+  });
+</script>
+</body>
+</html>

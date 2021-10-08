@@ -2,11 +2,13 @@ package com.fdkj.ysps.controller.xm;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fdkj.ysps.annotation.Log;
 import com.fdkj.ysps.api.model.system.User;
 import com.fdkj.ysps.api.model.system.Zd;
 import com.fdkj.ysps.api.model.xm.Xm;
 import com.fdkj.ysps.api.model.xm.XmFj;
 import com.fdkj.ysps.api.model.xm.XmReq;
+import com.fdkj.ysps.api.model.xm.XmReview;
 import com.fdkj.ysps.api.util.DictApi;
 import com.fdkj.ysps.api.util.XmApi;
 import com.fdkj.ysps.base.CusResponseBody;
@@ -16,14 +18,15 @@ import com.fdkj.ysps.constant.Constants;
 import com.fdkj.ysps.controller.BaseController;
 import com.fdkj.ysps.error.BusinessException;
 import com.fdkj.ysps.utils.DateUtils;
+import com.fdkj.ysps.utils.StringUtils;
 import com.fdkj.ysps.utils.file.FileUploadUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -41,6 +44,7 @@ import java.util.*;
  */
 @Controller
 @RequestMapping("CZF/XMGL")
+@Log(module = "项目")
 public class XmController extends BaseController {
     private static final Logger log = LoggerFactory.getLogger(XmController.class);
 
@@ -72,6 +76,40 @@ public class XmController extends BaseController {
         dictParams.put("fid", Constants.Dict.xmfl);
         List<Zd> dict_xmfl = dictApi.getZdList(request, dictParams);
         request.setAttribute("dict_xmfl", dict_xmfl);
+
+        return new ModelAndView("xmMgr/xm_index");
+    }
+
+    /**
+     * 跳转
+     *
+     * @param request req
+     * @param zt      状态
+     * @param opts    操作权限
+     * @return res
+     * @throws Exception err
+     */
+    @RequestMapping("{zt}/Index")
+    public ModelAndView indexZt(HttpServletRequest request, @PathVariable String zt,
+                                @RequestParam(value = "opts", required = false) List<String> opts) throws Exception {
+        request.setAttribute("cuser", xmApi.getUserFromCookie(request));
+        request.setAttribute("opts", opts);
+        if (opts != null && !opts.isEmpty()) {
+            String s = StringUtils.join(opts, ",");
+            request.setAttribute("optsStr", s);
+        }
+        //获取字典信息
+        //项目分类
+        Map<String, Object> dictParams = new HashMap<>();
+        dictParams.put("fid", Constants.Dict.xmfl);
+        List<Zd> dict_xmfl = dictApi.getZdList(request, dictParams);
+        request.setAttribute("dict_xmfl", dict_xmfl);
+
+        //状态
+        if (StringUtils.isNotBlank(zt)) {
+            request.setAttribute("zt", zt);
+        }
+
         return new ModelAndView("xmMgr/xm_index");
     }
 
@@ -152,6 +190,32 @@ public class XmController extends BaseController {
     }
 
     /**
+     * 跳转到审核页面1
+     * @param request req
+     * @param id 项目id
+     * @return res
+     * @throws Exception err
+     */
+    @RequestMapping("toReview1/{id}")
+    public ModelAndView toReview1(HttpServletRequest request, @PathVariable String id) throws Exception {
+        request.setAttribute("id", id);
+        return new ModelAndView("xmMgr/xm_review1");
+    }
+
+    /**
+     * 跳转到审核页面2
+     * @param request req
+     * @param id 项目id
+     * @return res
+     * @throws Exception err
+     */
+    @RequestMapping("toReview2/{id}")
+    public ModelAndView toReview2(HttpServletRequest request, @PathVariable String id) throws Exception {
+        request.setAttribute("id", id);
+        return new ModelAndView("xmMgr/xm_review2");
+    }
+
+    /**
      * 获取方案列表(分页)
      *
      * @param request req
@@ -163,9 +227,11 @@ public class XmController extends BaseController {
      */
     @RequestMapping("getList")
     @ResponseBody
+    @Log(module = "项目", desc = "获取方案列表(分页)", optType = Constants.OptType.SELECT)
     public ResponseEntity<CusResponseBody> getList(HttpServletRequest request, XmReq xmReq, Xm xm,
                                                    @RequestParam("page") Integer page, @RequestParam("limit") Integer limit) {
         try {
+            User cuser = xmApi.getUserFromCookie(request);
             Page<Xm> xmList = xmApi.getXmList(request, xmReq.toReqJson(), xm.toReqJson(), page, limit);
             //构造返回数据
             CusResponseBody cusResponseBody = CusResponseBody.success("获取项目列表成功", xmList);
@@ -184,6 +250,7 @@ public class XmController extends BaseController {
      */
     @RequestMapping("getXmbh")
     @ResponseBody
+    @Log(module = "项目", desc = "获取项目编号", optType = Constants.OptType.SELECT)
     public ResponseEntity<CusResponseBody> getXmBh(HttpServletRequest request) {
         try {
             String xmbh;
@@ -226,6 +293,7 @@ public class XmController extends BaseController {
      */
     @RequestMapping("getDetail/{id}")
     @ResponseBody
+    @Log(module = "项目", desc = "获取项目详情", optType = Constants.OptType.SELECT)
     public ResponseEntity<CusResponseBody> getDetail(HttpServletRequest request, @PathVariable String id) {
         try {
             JSONObject xmDetail = xmApi.getXmDetail(request, id);
@@ -239,16 +307,37 @@ public class XmController extends BaseController {
     }
 
     /**
-     * 添加编辑项目
+     * 添加项目
      *
      * @param request req
      * @param json    请求体
      * @return res
      */
-    @RequestMapping("aeXm")
+    @RequestMapping("addXm")
     @ResponseBody
-    public ResponseEntity<CusResponseBody> aeXm(HttpServletRequest request,
-                                                @RequestBody JSONObject json) {
+    @Log(module = "项目", desc = "添加项目", optType = Constants.OptType.ADD)
+    public ResponseEntity<CusResponseBody> addXm(HttpServletRequest request,
+                                                 @RequestBody JSONObject json) {
+        return aeXm(request, json);
+    }
+
+    /**
+     * 编辑项目
+     *
+     * @param request req
+     * @param json    请求体
+     * @return res
+     */
+    @RequestMapping("editXm")
+    @ResponseBody
+    @Log(module = "项目", desc = "添加项目", optType = Constants.OptType.EDIT)
+    public ResponseEntity<CusResponseBody> editXm(HttpServletRequest request,
+                                                  @RequestBody JSONObject json) {
+        return aeXm(request, json);
+    }
+
+    private ResponseEntity<CusResponseBody> aeXm(HttpServletRequest request,
+                                                 JSONObject json) {
         try {
             User cuser = xmApi.getUserFromCookie(request);
             String dateToStr = DateUtils.parseDateToStr("yyyy-MM-dd'T'HH:mm:ss.sss", new Date());
@@ -308,6 +397,7 @@ public class XmController extends BaseController {
      */
     @RequestMapping("delXm/{id}")
     @ResponseBody
+    @Log(module = "项目", desc = "删除项目", optType = Constants.OptType.DEL)
     public ResponseEntity<CusResponseBody> del(HttpServletRequest request, @PathVariable String id) {
         try {
             xmApi.delXm(request, id.trim());
@@ -321,6 +411,28 @@ public class XmController extends BaseController {
     }
 
     /**
+     * 审核项目
+     *
+     * @param request  req
+     * @param xmReview 审核参数
+     * @return res
+     */
+    @RequestMapping("reviewXm")
+    @ResponseBody
+    @Log(module = "项目", desc = "审核项目", optType = Constants.OptType.REVIEW)
+    public ResponseEntity<CusResponseBody> review(HttpServletRequest request, @Validated @ModelAttribute XmReview xmReview) {
+        try {
+            xmApi.reviewXm(request, xmReview);
+            //构造返回数据
+            CusResponseBody cusResponseBody = CusResponseBody.success("审核项目成功");
+            return new ResponseEntity<>(cusResponseBody, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("审核项目失败", e);
+            throw new BusinessException("审核项目失败: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), e);
+        }
+    }
+
+    /**
      * 上传文件
      *
      * @param file 文件(多个)
@@ -329,6 +441,7 @@ public class XmController extends BaseController {
      */
     @RequestMapping("upload")
     @ResponseBody
+    @Log(module = "项目", desc = "上传附件", optType = Constants.OptType.UPLOAD)
     public ResponseEntity<CusResponseBody> uploadFile(MultipartFile file, String type) {
         try {
             // 上传文件路径
@@ -374,9 +487,16 @@ public class XmController extends BaseController {
         return res;
     }
 
-
+    /**
+     * 提交项目
+     *
+     * @param request req
+     * @param id      项目id
+     * @return res
+     */
     @RequestMapping("tjXm/{id}")
     @ResponseBody
+    @Log(module = "项目", desc = "提交审核", optType = Constants.OptType.TO_REVIEW)
     public ResponseEntity<CusResponseBody> tj(HttpServletRequest request, @PathVariable String id) {
         try {
             xmApi.tjXm(request, id);

@@ -1,8 +1,10 @@
 package com.fdkj.ysps.controller;
 
+import com.fdkj.ysps.annotation.Log;
 import com.fdkj.ysps.api.model.system.View_PT_XT_MK_Model;
 import com.fdkj.ysps.api.util.SystemApi;
 import com.fdkj.ysps.base.CusResponseBody;
+import com.fdkj.ysps.constant.Constants;
 import com.fdkj.ysps.error.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("")
+@Log(module = "首页")
 public class IndexController {
 
     private static final Logger log = LoggerFactory.getLogger(IndexController.class);
@@ -46,6 +49,7 @@ public class IndexController {
 
     @RequestMapping("/index/getMenu")
     @ResponseBody
+    @Log(module = "首页", desc = "获取菜单", optType = Constants.OptType.SELECT)
     public ResponseEntity<CusResponseBody> getMenu(HttpServletRequest request) {
         try {
             List<View_PT_XT_MK_Model> menu = systemApi.getUserMenu(request);

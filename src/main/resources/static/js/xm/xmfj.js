@@ -15,7 +15,7 @@ const XMFJ = {
       },
       error: function (XMLHttpRequest, textStatus, errorThrown) {
         top.layer.close(loadi); //关闭弹出框
-        top.layer.msg(XMLHttpRequest.responseJSON.msg);
+        top.layer.msg(XMLHttpRequest.responseJSON.msg ? XMLHttpRequest.responseJSON.msg : "操作失败!");
         return false;
       }
     });

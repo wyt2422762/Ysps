@@ -1,5 +1,6 @@
 package com.fdkj.ysps.controller;
 
+import com.fdkj.ysps.annotation.Log;
 import com.fdkj.ysps.base.CusResponseBody;
 import com.fdkj.ysps.config.BusConfig;
 import com.fdkj.ysps.config.ServerConfig;
@@ -33,6 +34,7 @@ import java.io.File;
  */
 @Controller
 @RequestMapping("common")
+@Log(module = "通用")
 public class CommonController {
 
     private static final Logger log = LoggerFactory.getLogger(CommonController.class);
@@ -50,6 +52,7 @@ public class CommonController {
      * @param delete   是否删除
      */
     @RequestMapping("download")
+    @Log(module = "通用", desc = "下载文件", optType = Constants.OptType.DOWNLOAD)
     public void downloadFile(HttpServletRequest request, HttpServletResponse response,
                              @RequestParam("fileName") String fileName, @RequestParam("delete") Boolean delete) {
         try {
@@ -74,6 +77,7 @@ public class CommonController {
      * 通用上传请求
      */
     @RequestMapping("upload")
+    @Log(module = "通用", desc = "上传文件", optType = Constants.OptType.UPLOAD)
     public ResponseEntity<CusResponseBody> uploadFile(MultipartFile file) {
         try {
             // 上传文件路径
@@ -100,6 +104,7 @@ public class CommonController {
      * @param response resp
      */
     @GetMapping("download/upload")
+    @Log(module = "通用", desc = "下载上传资源", optType = Constants.OptType.DOWNLOAD)
     public void resourceDownload(String resource, String name, HttpServletResponse response) {
         try {
             if (!FileUtils.checkAllowDownload(resource)) {
@@ -128,6 +133,7 @@ public class CommonController {
      */
     @RequestMapping("del/upload")
     @ResponseBody
+    @Log(module = "通用", desc = "删除文件", optType = Constants.OptType.REMOVE)
     public ResponseEntity<CusResponseBody> delUpload(String resource, HttpServletRequest request, HttpServletResponse response) {
         try {
             if (!FileUtils.checkAllowDownload(resource)) {
@@ -157,6 +163,7 @@ public class CommonController {
      */
     @RequestMapping("getRandomNo")
     @ResponseBody
+    @Log(module = "通用", desc = "获取编号", optType = Constants.OptType.SELECT)
     public ResponseEntity<CusResponseBody> getRandomNo(MultipartFile file) {
         try {
             long nextId = noUtil.getNextId();
