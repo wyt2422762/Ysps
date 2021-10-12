@@ -34,6 +34,7 @@
         <aspose-words.version>19.1</aspose-words.version>
         <freemarker.version>2.3.31</freemarker.version>
         <itextpdf.version>5.5.13.2</itextpdf.version>
+        <commons.beanutils.version>1.9.4</commons.beanutils.version>
     </properties>
 
     <repositories>
@@ -133,6 +134,13 @@
             <artifactId>commons-fileupload</artifactId>
             <version>${commons.fileupload.version}</version>
         </dependency>
+        <!-- commons-beanutils -->
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>${commons.beanutils.version}</version>
+        </dependency>
+
         <!-- fast json -->
         <dependency>
             <groupId>com.alibaba</groupId>

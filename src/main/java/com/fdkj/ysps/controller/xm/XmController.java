@@ -422,7 +422,13 @@ public class XmController extends BaseController {
     @Log(module = "项目", desc = "审核项目", optType = Constants.OptType.REVIEW)
     public ResponseEntity<CusResponseBody> review(HttpServletRequest request, @Validated @ModelAttribute XmReview xmReview) {
         try {
+            User cuser = xmApi.getUserFromCookie(request);
             xmApi.reviewXm(request, xmReview);
+
+            if(Constants.Zfzxzr.rygh.equals(cuser.getRyhg())) {
+                xmApi.xm_remark(request, xmReview);
+            }
+
             //构造返回数据
             CusResponseBody cusResponseBody = CusResponseBody.success("审核项目成功");
             return new ResponseEntity<>(cusResponseBody, HttpStatus.OK);

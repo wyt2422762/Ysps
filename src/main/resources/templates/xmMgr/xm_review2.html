@@ -8,6 +8,23 @@
   <div id="LAY_preview">
     <form class="layui-form" method="post" id="review_Form">
       <div class="layui-form">
+        <div class="layui-form-item">
+          <div class="layui-inline">
+            <label class="layui-form-label">询价</label>
+            <div class="layui-input-block">
+              <input type="checkbox" name="sfxj" id="sfxj" value="1" lay-skin="switch" lay-text="是|否"
+                     lay-filter="sfxj"/>
+            </div>
+          </div>
+          <div class="layui-inline" style="display: none;" id="kpxm">
+            <label class="layui-form-label">快评项目</label>
+            <div class="layui-input-block">
+              <input type="checkbox" name="sfkpxm" id="sfkpxm" value="1" lay-skin="switch" lay-text="是|否"
+                     lay-filter="sfkpxm"/>
+            </div>
+          </div>
+        </div>
+
         <div class="layui-form-item layui-form-text">
           <label class="layui-form-label">审核意见</label>
           <div class="layui-input-block">
@@ -39,8 +56,8 @@
     //let table = layui.table;
 
     //监听提交
-    //通过
-    form.on('submit(ty)', function(data){
+    //同意
+    form.on('submit(ty)', function (data) {
       top.layer.confirm('确定要通过该项目？', {
         btn: ['确定', '取消'] //按钮
       }, function (index) {
@@ -65,7 +82,7 @@
       return false;
     });
     //退回
-    form.on('submit(th)', function(data){
+    form.on('submit(th)', function (data) {
       debugger;
       top.layer.confirm('确定要退回该项目？', {
         btn: ['确定', '取消'] //按钮
@@ -89,6 +106,18 @@
         top.layer.close(indexout); //关闭弹出框
       });
       return false;
+    });
+
+    //监听开关
+    form.on('switch(sfxj)', function (data) {
+      debugger;
+      if(data.elem.checked) {
+        $("#kpxm").show();
+      } else {
+        $("#kpxm").hide();
+        $("#sfkpxm").attr("checked", false);
+        form.render();//刷新表单
+      }
     });
 
   });

@@ -124,6 +124,16 @@ public class Xm {
     private String dqjdid;
 
     /**
+     * 是否已询价
+     */
+    private String sfyxj;
+
+    /**
+     * 是否已招标
+     */
+    private String sfyzb;
+
+    /**
      * 附件列表
      */
     private List<XmFj> fjList;

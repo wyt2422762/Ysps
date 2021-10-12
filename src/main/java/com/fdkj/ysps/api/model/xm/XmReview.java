@@ -30,4 +30,14 @@ public class XmReview {
      */
     @NotBlank(message = "审核意见不能为空")
     private String nr;
+
+    /**
+     * 是否询价
+     */
+    private String sfxj = "0";
+
+    /**
+     * 是否快评项目
+     */
+    private String sfkpxm = "0";
 }

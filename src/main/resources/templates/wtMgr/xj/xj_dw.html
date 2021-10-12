@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/common/header::header(~{::title},~{},~{})">
+  <title>预算评审系统-委托-询价单位</title>
+</head>
+<body>
+
+<input type="hidden" id="opts" th:value="${optsStr}"/>
+
+<div class="layui-tab-item layui-show" style="padding: 10px;">
+  <div id="LAY_preview">
+    <fieldset class="layui-elem-field layui-field-title">
+      <legend>询价单位</legend>
+    </fieldset>
+
+    <!-- 方案列表 -->
+    <div style="padding: 10px;">
+      <div>
+        <div class="layui-inline" th:if="${sfyxj != '是'}">
+          <button th:if="${#lists.contains(opts, 'add')}" id="addXjDw" class="layui-btn layui-btn-normal"
+                  style="margin-left:15px;">添加询价单位
+          </button>
+        </div>
+      </div>
+
+      <table id="xjDwTable" class="layui-table" lay-filter="xjDwTable"></table>
+
+      <script type="text/html" id="xjDwTableToolBar">
+        <a th:if="${#lists.contains(opts, 'show')}" class="layui-btn layui-btn-xs"
+           lay-event="mx">详情</a>
+        <a th:if="${sfyxj != '是' && #lists.contains(opts, 'update')}" class="layui-btn layui-btn-normal layui-btn-xs"
+           lay-event="edit">编辑</a>
+        <a th:if="${sfyxj != '是' && #lists.contains(opts, 'del')}" class="layui-btn layui-btn-danger layui-btn-xs"
+           lay-event="del">删除</a>
+      </script>
+    </div>
+  </div>
+</div>
+
+<div th:replace="/common/footer::footer()"></div>
+
+<script type="text/javascript" th:src="@{/static/js/wt/xj.js}"></script>
+
+<script th:inline="javascript">
+  const cuser = [[${cuser}]];
+  const opts = [[${opts}]];
+  const xmid = [[${xmid}]];
+  const sfyxj = [[${sfyxj}]];
+
+  layui.config({
+    base: ctx + 'static/js/layuiExts/'
+  }).use(['element', 'laydate', 'table', 'form'], function () {
+    //let element = layui.element;
+    let laydate = layui.laydate;
+    let form = layui.form;
+    let table = layui.table;
+
+    getInitData();
+
+    //获取方案管理列表
+    function getTableData(params) {
+      let url = ctx + 'CZF/WT/XJ/getList';
+      //获取表格数据
+      table.render({
+        elem: '#xjDwTable',
+        title: '询价单位列表',
+        url: url, //数据接口
+        where: params, //请求参数
+        page: {
+          layout: ['prev', 'page', 'next', 'skip', 'count']
+        },
+        // page: true,
+        limit: 10,
+        //limits: [10, 20, 50],
+        cols: [[ //表头
+          {field: 'jgmc', title: '机构名称'},
+          {field: 'jgzz', title: '机构资质'},
+          {field: 'lxr', title: "联系人"},
+          {field: 'lxdh', title: "联系电话"},
+          {field: 'bj', title: "报价"},
+
+          {field: 'sfzb', title: '是否中标'},
+
+          {fixed: 'right', align: 'center', title: '操作', toolbar: '#xjDwTableToolBar'}
+        ]],
+        parseData: function (res) { //res 即为原始返回的数据
+          return {
+            "code": res.success ? 0 : 1, //解析接口状态
+            "msg": res.msg, //解析提示文本
+            "count": res.data.totalRecord, //解析数据长度
+            "data": res.data.dataList //解析数据列表
+          };
+        }
+      });
+    }
+
+    //工具条事件
+    table.on('tool(xjDwTable)', function (obj) {
+      let data = obj.data; //获得当前行数据
+      let layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+      let tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+      if (layEvent === 'mx') { //详情
+        let url = ctx + "CZF/WT/XJ/toInfo/" + data.id;
+        let title = '询价单位详情';
+        showInfoDialog(url, title);
+      } else if (layEvent === 'del') { //删除
+        top.layer.confirm('确定要删除该询价单位？', {
+          btn: ['确定', '取消'] //按钮
+        }, function () {
+          XJ.delXjDw(data.id, function () {
+            window.location.reload();
+            return false;
+          });
+        }, function () {
+        });
+      } else if (layEvent === 'edit') { //编辑
+        let url = ctx + "CZF/WT/XJ/toEdit/" + data.id;
+        let title = '编辑询价单位';
+        showAeDialog(url, title, function () {
+          window.location.reload();
+        });
+      }
+    });
+
+    //获取初始数据
+    function getInitData() {
+      let params = {};
+      params['fk_xmid'] = xmid;
+      getTableData(params);
+      return false;
+    }
+
+    //添加按钮事件
+    $("#addXjDw").on('click', function () {
+      let url = ctx + "CZF/WT/XJ/toAdd/" + xmid;
+      let title = '添加询价单位';
+      showAeDialog(url, title, function () {
+        window.location.reload();
+      });
+    });
+
+    //显示添加修改弹出框
+    function showAeDialog(url, title) {
+      top.layer.open({
+        type: 2,
+        title: title,
+        closeBtn: 1,
+        shadeClose: false,
+        area: ['900px', '60%'],
+        content: url,
+        btn: ['确定', '取消'],
+        yes: function (index, layero) {
+          let body = top.layer.getChildFrame('body', index);
+          let frm = $(body).find("form#xjDw_editForm");
+          $(frm).find("button.sb").click();
+          return false;
+        },
+        end: function (index) {
+          top.layer.close(index);
+        }
+      });
+    }
+
+    //显示详情修改弹出框
+    function showInfoDialog(url, title) {
+      top.layer.open({
+        type: 2,
+        title: title,
+        closeBtn: 1,
+        shadeClose: false,
+        area: ['900px', '60%'],
+        content: url
+      });
+    }
+  });
+</script>
+</body>
+</html>

@@ -2,8 +2,8 @@ package com.fdkj.ysps.api.util;
 
 import com.alibaba.fastjson.JSONObject;
 import com.fdkj.ysps.api.model.system.User;
+import com.fdkj.ysps.api.model.wt.Xj;
 import com.fdkj.ysps.api.model.xm.Xm;
-import com.fdkj.ysps.api.model.xm.XmReview;
 import com.fdkj.ysps.base.Page;
 import com.fdkj.ysps.error.BusinessException;
 import org.slf4j.Logger;
@@ -18,16 +18,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 项目基本信息接口
+ * 询价接口
  *
  * @author wyt
  */
 @Component
-public class XmApi extends BaseApi {
-    private static final Logger logger = LoggerFactory.getLogger(XmApi.class);
+public class XjApi extends BaseApi {
+    private static final Logger logger = LoggerFactory.getLogger(XjApi.class);
 
     /**
-     * 获取项目信息列表(分页)
+     * 获取询价单位列表(分页)
      *
      * @param request   req
      * @param reqParams 请求参数
@@ -37,7 +37,7 @@ public class XmApi extends BaseApi {
      * @return res
      * @throws Exception err
      */
-    public Page<Xm> getXmList(HttpServletRequest request, Map<String, Object> reqParams, Map<String, Object> reqBody, Integer pageNo, Integer pageSize) throws Exception {
+    public Page<Xj> getXjDwList(HttpServletRequest request, Map<String, Object> reqParams, Map<String, Object> reqBody, Integer pageNo, Integer pageSize) throws Exception {
         User user = getUserFromCookie(request);
         //请求头
         HttpHeaders headers = getHttpHeaders(request);
@@ -57,7 +57,7 @@ public class XmApi extends BaseApi {
         params.put("page", pageNo == null ? 1 : pageNo);
         params.put("pageNum", pageSize == null ? 10 : pageSize);
 
-        String url = baseUrl + "/api/CZF/YS_XMXX_List";
+        String url = baseUrl + "/api/CZF/YS_KPXM_List";
 
         if (reqParams != null && !reqParams.isEmpty()) {
             params.putAll(reqParams);
@@ -77,25 +77,25 @@ public class XmApi extends BaseApi {
 
         boolean success = jsonObject.getBooleanValue("Success");
         if (!success) {
-            logger.error("获取项目列表失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_List");
-            logger.error("获取项目列表失败，请求参数: " + params);
-            logger.error("获取项目列表失败，请求体: " + body.toJSONString());
-            logger.error("获取项目列表失败，返回内容: " + responseEntityBody);
+            logger.error("获取询价单位列表失败，请求url: " + baseUrl + "/api/CZF/YS_KPXM_List");
+            logger.error("获取询价单位列表失败，请求参数: " + params);
+            logger.error("获取询价单位列表失败，请求体: " + body.toJSONString());
+            logger.error("获取询价单位列表失败，返回内容: " + responseEntityBody);
             throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
 
         //构造返回信息
-        Page<Xm> page = new Page<>(pageNo == null ? 1 : pageNo, pageSize == null ? 10 : pageSize);
+        Page<Xj> page = new Page<>(pageNo == null ? 1 : pageNo, pageSize == null ? 10 : pageSize);
         Integer totalRecord = jsonObject.getInteger("TotalCount");
         page.setTotalRecord(totalRecord);
-        List<Xm> dataList = jsonObject.getJSONArray("Results").toJavaList(Xm.class);
+        List<Xj> dataList = jsonObject.getJSONArray("Results").toJavaList(Xj.class);
         page.setDataList(dataList);
 
         return page;
     }
 
     /**
-     * 获取项目信息列表
+     * 获取询价单位列表(分页)
      *
      * @param request   req
      * @param reqParams 请求参数
@@ -103,7 +103,7 @@ public class XmApi extends BaseApi {
      * @return res
      * @throws Exception err
      */
-    public List<Xm> getXmListAll(HttpServletRequest request, Map<String, Object> reqParams, Map<String, Object> reqBody) throws Exception {
+    public List<Xj> getXjDwList(HttpServletRequest request, Map<String, Object> reqParams, Map<String, Object> reqBody) throws Exception {
         User user = getUserFromCookie(request);
         //请求头
         HttpHeaders headers = getHttpHeaders(request);
@@ -121,16 +121,14 @@ public class XmApi extends BaseApi {
         //请求参数
         Map<String, Object> params = new HashMap<>(4);
 
-        String url = baseUrl + "/api/CZF/YS_XMXX_List";
+        String url = baseUrl + "/api/CZF/YS_KPXM_List";
 
         if (reqParams != null && !reqParams.isEmpty()) {
             params.putAll(reqParams);
         }
 
         List<String> paramList = new ArrayList<>();
-        params.forEach((key, value) -> {
-            paramList.add(key + "={" + key + "}");
-        });
+        params.forEach((key, value) -> paramList.add(key + "={" + key + "}"));
 
         if (!paramList.isEmpty()) {
             url += ("?" + String.join("&", paramList));
@@ -143,25 +141,25 @@ public class XmApi extends BaseApi {
 
         boolean success = jsonObject.getBooleanValue("Success");
         if (!success) {
-            logger.error("获取项目列表失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_List");
-            logger.error("获取项目列表失败，请求参数: " + params);
-            logger.error("获取项目列表失败，请求体: " + body.toJSONString());
-            logger.error("获取项目列表失败，返回内容: " + responseEntityBody);
+            logger.error("获取询价单位列表失败，请求url: " + baseUrl + "/api/CZF/YS_KPXM_List");
+            logger.error("获取询价单位列表失败，请求参数: " + params);
+            logger.error("获取询价单位列表失败，请求体: " + body.toJSONString());
+            logger.error("获取询价单位列表失败，返回内容: " + responseEntityBody);
             throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
 
         //构造返回信息
-        return jsonObject.getJSONArray("Results").toJavaList(Xm.class);
+        return jsonObject.getJSONArray("Results").toJavaList(Xj.class);
     }
 
     /**
-     * 获取项目详情
+     * 获取询价单位详情
      *
      * @param request req
      * @param id      项目id
      * @return res
      */
-    public JSONObject getXmDetail(HttpServletRequest request, String id) throws Exception {
+    public Xj getXjDwDetail(HttpServletRequest request, String id) throws Exception {
         //请求头
         HttpHeaders headers = getHttpHeaders(request);
         //请求体
@@ -175,7 +173,7 @@ public class XmApi extends BaseApi {
         Map<String, Object> params = new HashMap<>(1);
         params.put("id", id);
 
-        String url = baseUrl + "/api/CZF/YS_XMXX_Model?id={id}";
+        String url = baseUrl + "/api/CZF/YS_KPXM_Model?id={id}";
         ResponseEntity<String> responseEntity =
                 restTemplate.exchange(url,
                         HttpMethod.POST, requestEntity, String.class, params);
@@ -184,48 +182,48 @@ public class XmApi extends BaseApi {
 
         boolean success = jsonObject.getBooleanValue("Success");
         if (!success) {
-            logger.error("获取项目详情失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_Model");
-            logger.error("获取项目详情失败，请求体: " + body.toJSONString());
-            logger.error("获取项目详情失败，请求参数: " + params);
-            logger.error("获取项目详情失败，返回内容: " + responseEntityBody);
+            logger.error("获取询价单位详情失败，请求url: " + baseUrl + "/api/CZF/YS_KPXM_Model");
+            logger.error("获取询价单位详情失败，请求体: " + body.toJSONString());
+            logger.error("获取询价单位详情失败，请求参数: " + params);
+            logger.error("获取询价单位详情失败，返回内容: " + responseEntityBody);
             throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
 
-        return jsonObject.getJSONObject("Results");
+        return jsonObject.getObject("Results", Xj.class);
     }
 
     /**
-     * 更新添加项目
+     * 更新添加询价单位
      *
      * @param request req
      * @param body    请求体
      */
-    public void aeXm(HttpServletRequest request, JSONObject body) {
+    public void aeXjDw(HttpServletRequest request, JSONObject body) {
         //请求头
         HttpHeaders headers = getHttpHeaders(request);
         //组装请求体
         HttpEntity<JSONObject> requestEntity = new HttpEntity<>(body, headers);
         ResponseEntity<String> responseEntity =
-                restTemplate.exchange(baseUrl + "/api/CZF/YS_XMXX_Update",
+                restTemplate.exchange(baseUrl + "/api/CZF/YS_KPXM_Update",
                         HttpMethod.POST, requestEntity, String.class);
         String responseEntityBody = responseEntity.getBody();
         JSONObject jsonObject = JSONObject.parseObject(responseEntityBody);
         boolean success = jsonObject.getBooleanValue("Success");
         if (!success) {
-            logger.error("更新添加项目失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_Update");
-            logger.error("更新添加项目失败，请求体: " + body.toJSONString());
-            logger.error("更新添加项目失败，返回内容: " + responseEntityBody);
+            logger.error("更新添加询价单位失败，请求url: " + baseUrl + "/api/CZF/YS_KPXM_Update");
+            logger.error("更新添加询价单位失败，请求体: " + body.toJSONString());
+            logger.error("更新添加询价单位失败，返回内容: " + responseEntityBody);
             throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
     /**
-     * 删除项目
+     * 删除询价单位
      *
      * @param request req
-     * @param id    项目id
+     * @param id      项目id
      */
-    public void delXm(HttpServletRequest request, String id) {
+    public void delXjDw(HttpServletRequest request, String id) {
         //请求头
         HttpHeaders headers = getHttpHeaders(request);
         //组装请求体
@@ -235,106 +233,44 @@ public class XmApi extends BaseApi {
         params.put("id", id);
         //请求
         ResponseEntity<String> responseEntity =
-                restTemplate.exchange(baseUrl + "/api/CZF/YS_XMXX_Del?id={id}",
+                restTemplate.exchange(baseUrl + "/api/CZF/YS_KPXM_Del?id={id}",
                         HttpMethod.POST, requestEntity, String.class, params);
         String responseEntityBody = responseEntity.getBody();
         JSONObject jsonObject = JSONObject.parseObject(responseEntityBody);
         boolean success = jsonObject.getBooleanValue("Success");
         if (!success) {
-            logger.error("删除项目失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_Del");
-            logger.error("删除项目失败，请求参数: " + params);
-            logger.error("删除项目失败，返回内容: " + responseEntityBody);
+            logger.error("删除询价单位失败，请求url: " + baseUrl + "/api/CZF/YS_KPXM_Del");
+            logger.error("删除询价单位失败，请求参数: " + params);
+            logger.error("删除询价单位失败，返回内容: " + responseEntityBody);
             throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
     /**
-     * 提交项目
+     * 完成
      *
      * @param request req
-     * @param id    项目id
+     * @param xmid    项目id
      */
-    public void tjXm(HttpServletRequest request, String id) {
+    public void completeXjDw(HttpServletRequest request, String xmid) {
         //请求头
         HttpHeaders headers = getHttpHeaders(request);
         //组装请求体
         HttpEntity<JSONObject> requestEntity = new HttpEntity<>(null, headers);
         //参数
         Map<String, String> params = new HashMap<>(1);
-        params.put("id", id);
+        params.put("xmid", xmid);
         //请求
         ResponseEntity<String> responseEntity =
-                restTemplate.exchange(baseUrl + "/api/CZF/YS_XMXX_TJ?id={id}",
+                restTemplate.exchange(baseUrl + "/api/CZF/YS_KPXM_WC?xmid={xmid}",
                         HttpMethod.POST, requestEntity, String.class, params);
         String responseEntityBody = responseEntity.getBody();
         JSONObject jsonObject = JSONObject.parseObject(responseEntityBody);
         boolean success = jsonObject.getBooleanValue("Success");
         if (!success) {
-            logger.error("提交项目失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_TJ");
-            logger.error("提交项目失败，请求参数: " + params);
-            logger.error("提交项目失败，返回内容: " + responseEntityBody);
-            throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
-    }
-
-    /**
-     * 审核项目
-     * @param request req
-     * @param xmReview 项目审核参数
-     */
-    public void reviewXm(HttpServletRequest request, XmReview xmReview) {
-        //请求头
-        HttpHeaders headers = getHttpHeaders(request);
-        //组装请求体
-        HttpEntity<JSONObject> requestEntity = new HttpEntity<>(null, headers);
-        //参数
-        Map<String, String> params = new HashMap<>(3);
-        params.put("id", xmReview.getId());
-        params.put("tj", xmReview.getTj());
-        params.put("nr", xmReview.getNr());
-        //请求
-        ResponseEntity<String> responseEntity =
-                restTemplate.exchange(baseUrl + "/api/CZF/YS_XMXX_SH?id={id}&tj={tj}&nr={nr}",
-                        HttpMethod.POST, requestEntity, String.class, params);
-        String responseEntityBody = responseEntity.getBody();
-        JSONObject jsonObject = JSONObject.parseObject(responseEntityBody);
-        boolean success = jsonObject.getBooleanValue("Success");
-        if (!success) {
-            logger.error("审核项目失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_SH");
-            logger.error("审核项目失败，请求参数: " + params);
-            logger.error("审核项目失败，返回内容: " + responseEntityBody);
-            throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
-    }
-
-    // /api/CZF/YS_XMXX_XMBZ
-
-    /**
-     * 项目标注
-     * @param request req
-     * @param xmReview 项目审核参数
-     */
-    public void xm_remark(HttpServletRequest request, XmReview xmReview) {
-        //请求头
-        HttpHeaders headers = getHttpHeaders(request);
-        //组装请求体
-        HttpEntity<JSONObject> requestEntity = new HttpEntity<>(null, headers);
-        //参数
-        Map<String, String> params = new HashMap<>(3);
-        params.put("id", xmReview.getId());
-        params.put("sfxj", xmReview.getSfxj());
-        params.put("sfkpxm", xmReview.getSfkpxm());
-        //请求
-        ResponseEntity<String> responseEntity =
-                restTemplate.exchange(baseUrl + "/api/CZF/YS_XMXX_XMBZ?id={id}&sfxj={sfxj}&sfkpxm={sfkpxm}",
-                        HttpMethod.POST, requestEntity, String.class, params);
-        String responseEntityBody = responseEntity.getBody();
-        JSONObject jsonObject = JSONObject.parseObject(responseEntityBody);
-        boolean success = jsonObject.getBooleanValue("Success");
-        if (!success) {
-            logger.error("项目标注失败，请求url: " + baseUrl + "/api/CZF/YS_XMXX_XMBZ");
-            logger.error("项目标注失败，请求参数: " + params);
-            logger.error("项目标注失败，返回内容: " + responseEntityBody);
+            logger.error("项目询价完成失败，请求url: " + baseUrl + "/api/CZF/YS_KPXM_WC");
+            logger.error("项目询价完成失败，请求参数: " + params);
+            logger.error("项目询价完成失败，返回内容: " + responseEntityBody);
             throw new BusinessException(jsonObject.getString("Message"), HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }

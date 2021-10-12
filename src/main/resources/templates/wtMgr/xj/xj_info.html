@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/common/header::header(~{::title},~{},~{})">
+  <title>预算评审系统-询价单位详情</title>
+</head>
+<body>
+<div style="padding: 20px;">
+  <form class="layui-form" method="post" id="xjDw_Form" lay-filter="xjDw_Form">
+    <div class="layui-form">
+      <table class="layui-table">
+        <tbody>
+        <tr>
+          <th>机构名称</th>
+          <td>
+            <input type="text" name="jgmc" lay-verify="required" placeholder="" class="layui-input"/>
+          </td>
+          <th>机构资质</th>
+          <td>
+            <input type="text" name="jgzz" lay-verify="required" placeholder="" class="layui-input"/>
+          </td>
+        </tr>
+        <tr>
+          <th>联系人</th>
+          <td>
+            <input type="text" name="lxr" lay-verify="required" placeholder="" class="layui-input"/>
+          </td>
+          <th>联系电话</th>
+          <td>
+            <input type="text" name="lxdh" lay-verify="required" placeholder="" class="layui-input"/>
+          </td>
+        </tr>
+        <tr>
+          <th>报价</th>
+          <td>
+            <input type="number" name="bj" lay-verify="required|cnumber" placeholder="" class="layui-input"/>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <input type="hidden" name="fk_xmid" class="layui-input" th:value="${xmid}"/>
+  </form>
+</div>
+
+<div th:replace="/common/footer::footer()"></div>
+
+<script type="text/javascript" th:src="@{/static/js/wt/xj.js}"></script>
+
+<script th:inline="javascript">
+  const cuser = [[${cuser}]];
+  const id = [[${id}]];
+
+  layui.config({
+    base: ctx + 'static/js/layuiExts/'
+  }).use(['element', 'laydate', 'table', 'form'], function () {
+    //let element = layui.element;
+    //let laydate = layui.laydate;
+    let form = layui.form;
+    //let table = layui.table;
+
+    getXjDw(id);
+
+    //获取项目信息
+    function getXjDw(id) {
+      XJ.getXjDwDetail(id, function (data) {
+        xjdw = data.data;
+        //表单回显
+        form.val("xjDw_Form", xjdw);
+      });
+    }
+
+  });
+</script>
+</body>
+</html>

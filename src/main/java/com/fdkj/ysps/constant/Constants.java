@@ -28,6 +28,16 @@ public class Constants {
     }
 
     /**
+     * 支付中心主任
+     */
+    public static class Zfzxzr {
+        /**
+         * 人员工号
+         */
+        public static final String rygh = "100101";
+    }
+
+    /**
      * 操作类型
      */
     public static class OptType {
@@ -100,5 +110,10 @@ public class Constants {
          * 登出
          */
         public static final String LOGOUT = "登出";
+
+        /**
+         * 确认
+         */
+        public static final String CONFIRM = "确认";
     }
 }
