@@ -183,7 +183,7 @@ public class XjController extends BaseController {
     @RequestMapping("getDetail/{id}")
     @ResponseBody
     @Log(module = "询价", desc = "获取询价单位详情", optType = Constants.OptType.SELECT)
-    public ResponseEntity<CusResponseBody> getList(HttpServletRequest request, @PathVariable String id) {
+    public ResponseEntity<CusResponseBody> getDetail(HttpServletRequest request, @PathVariable String id) {
         try {
             User cuser = xjApi.getUserFromCookie(request);
             Xj xjDwDetail = xjApi.getXjDwDetail(request, id);
@@ -219,7 +219,7 @@ public class XjController extends BaseController {
      */
     @RequestMapping("editXj")
     @ResponseBody
-    @Log(module = "询价", desc = "添加询价单位", optType = Constants.OptType.EDIT)
+    @Log(module = "询价", desc = "编辑询价单位", optType = Constants.OptType.EDIT)
     public ResponseEntity<CusResponseBody> editXjDw(HttpServletRequest request,
                                                     @RequestBody JSONObject json) {
         return aeXjDw(request, json);
@@ -231,7 +231,7 @@ public class XjController extends BaseController {
             User cuser = xmApi.getUserFromCookie(request);
             xjApi.aeXjDw(request, json);
             //构造返回数据
-            CusResponseBody cusResponseBody = CusResponseBody.success("更新项目成功");
+            CusResponseBody cusResponseBody = CusResponseBody.success("更新询价单位成功");
             return new ResponseEntity<>(cusResponseBody, HttpStatus.OK);
         } catch (Exception e) {
             log.error("更新询价单位失败", e);

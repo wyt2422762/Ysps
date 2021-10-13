@@ -5,7 +5,7 @@
 </head>
 <body>
 <div style="padding: 20px;">
-  <form class="layui-form" method="post" id="xjDw_addForm">
+  <form class="layui-form" method="post" id="xjDw_Form">
     <div class="layui-form">
       <table class="layui-table">
         <tbody>
@@ -39,6 +39,7 @@
       </table>
     </div>
     <input type="hidden" name="fk_xmid" class="layui-input" th:value="${xmid}"/>
+    <input type="hidden" name="sfzb" class="layui-input" value="否"/>
     <button style="display:none;" lay-submit lay-filter="submitBut" class="sb"></button>
   </form>
 </div>

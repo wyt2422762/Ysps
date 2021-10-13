@@ -4,7 +4,6 @@
   <title>预算评审系统-委托-询价</title>
 </head>
 <body>
-
 <input type="hidden" id="opts" th:value="${optsStr}"/>
 
 <div class="layui-tab-item layui-show" style="padding: 10px;">
@@ -87,18 +86,17 @@
       <script type="text/html" id="xmTableToolBar">
         <a th:if="${#lists.contains(opts, 'show')}" class="layui-btn layui-btn-xs"
            lay-event="mx">项目详情</a>
-        <a th:if="${#lists.contains(opts, 'add')}" class="layui-btn layui-btn-normal layui-btn-xs"
-           lay-event="xjDw">询价单位</a>
+        <a th:if="${#lists.contains(opts, 'add') || #lists.contains(opts, 'update')}" class="layui-btn layui-btn-normal layui-btn-xs"
+           lay-event="zbxx">招标信息</a>
       </script>
 
     </div>
-
   </div>
 </div>
 
 <div th:replace="/common/footer::footer()"></div>
 
-<script type="text/javascript" th:src="@{/static/js/wt/xj.js}"></script>
+<script type="text/javascript" th:src="@{/static/js/wt/zb.js}"></script>
 
 <script th:inline="javascript">
   const cuser = [[${cuser}]];
@@ -206,20 +204,47 @@
       if (layEvent === 'mx') { //详情
         let url = ctx + "CZF/XMGL/toInfo/" + data.id;
         let title = '项目详情';
+        showInfoDialog(url, title);
+      } else if (layEvent === 'zbxx') { //招标信息
+        let url = ctx + "CZF/WT/ZB/toEdit/" + data.id;
+        let title = '招标信息';
         showAeDialog(url, title);
-      } else if (layEvent === 'xjDw') { //询价单位
-        let url = ctx + "CZF/WT/XJ/toDw/" + data.id;
-        let title = '询价单位';
-
-        TAB.open({
-          "data-id": "add-fa",
-          "data-url": ctx + "CZF/WT/XJ/toXjdw/" + data.id,
-          "data-opts": $("#opts").val(),
-          "title": "询价单位"
-        });
-
       }
     });
+
+    //显示添加修改弹出框
+    function showInfoDialog(url, title) {
+      top.layer.open({
+        type: 2,
+        title: title,
+        closeBtn: 1,
+        shadeClose: false,
+        area: ['900px', '60%'],
+        content: url
+      });
+    }
+
+    //显示添加修改弹出框
+    function showAeDialog(url, title) {
+      top.layer.open({
+        type: 2,
+        title: title,
+        closeBtn: 1,
+        shadeClose: false,
+        area: ['900px', '60%'],
+        content: url,
+        btn: ['确定', '取消'],
+        yes: function (index, layero) {
+          let body = top.layer.getChildFrame('body', index);
+          let frm = $(body).find("form#zb_form");
+          $(frm).find("button.sb").click();
+          return false;
+        },
+        end: function (index) {
+          top.layer.close(index);
+        }
+      });
+    }
 
     //搜索按钮事件
     form.on('submit(formDemo1)', function (data) {
@@ -255,7 +280,7 @@
         params['wtendtime'] = wtendtime;
       }
       params['zt'] = '已完成';
-      params['sfxj'] = '1';
+      params['sfxj'] = '0';
 
       getTableData(params);
       return false;
@@ -266,28 +291,11 @@
       debugger;
       let params = {};
       params['zt'] = '已完成';
-      params['sfxj'] = '1';
+      params['sfxj'] = '0';
       getTableData(params);
       return false;
     }
 
-    //显示添加修改弹出框
-    function showAeDialog(url, title, callBack) {
-      top.layer.open({
-        type: 2,
-        title: title,
-        closeBtn: 1,
-        shadeClose: false,
-        area: ['1200px', '90%'],
-        content: url,
-        end: function (index) {
-          top.layer.close(index);
-          if (callBack) {
-            callBack();
-          }
-        }
-      });
-    }
   });
 </script>
 </body>

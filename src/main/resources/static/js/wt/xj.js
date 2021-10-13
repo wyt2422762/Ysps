@@ -24,7 +24,6 @@ const XJ = {
   },
   //保存询价单位
   saveXjDw: function (xj, url, callBack) {
-    debugger;
     let loadi = top.layer.load();
     $.ajax({
       url: url,
@@ -72,7 +71,7 @@ const XJ = {
   confirmXjDw: function (xmid, callBack) {
     let loadi = top.layer.load();
     $.ajax({
-      url: ctx + "CZF/WT/XJ/confirmXj/" + id,
+      url: ctx + "CZF/WT/XJ/confirmXj/" + xmid,
       type: "POST",
       success: function (data) {
         top.layer.close(loadi); //关闭弹出框

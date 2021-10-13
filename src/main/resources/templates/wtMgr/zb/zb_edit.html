@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="/common/header::header(~{::title},~{},~{})">
-  <title>预算评审系统-编辑询价单位</title>
+  <title>预算评审系统-编辑招标信息</title>
 </head>
 <body>
 <div style="padding: 20px;">
-  <form class="layui-form" method="post" id="xjDw_Form" lay-filter="xjDw_Form">
+  <form class="layui-form" method="post" id="zb_form" lay-filter="zb_form">
     <div class="layui-form">
       <table class="layui-table">
         <tbody>
@@ -30,31 +30,30 @@
           </td>
         </tr>
         <tr>
-          <th>报价</th>
+          <th>中标价</th>
           <td>
-            <input type="number" name="bj" lay-verify="required|cnumber" placeholder="" class="layui-input"/>
+            <input type="number" name="zbj" lay-verify="required|cnumber" placeholder="" class="layui-input"/>
           </td>
         </tr>
         </tbody>
       </table>
     </div>
-    <input type="hidden" name="fk_xmid" class="layui-input" />
+    <input type="hidden" name="fk_xmid" class="layui-input" th:value="${xmid}"/>
     <input type="hidden" name="id" class="layui-input" />
     <input type="hidden" name="addtime"/>
     <input type="hidden" name="fk_xtglid"/>
     <input type="hidden" name="fk_qybm"/>
-    <input type="hidden" name="sfzb"/>
     <button style="display:none;" lay-submit lay-filter="submitBut" class="sb"></button>
   </form>
 </div>
 
 <div th:replace="/common/footer::footer()"></div>
 
-<script type="text/javascript" th:src="@{/static/js/wt/xj.js}"></script>
+<script type="text/javascript" th:src="@{/static/js/wt/zb.js}"></script>
 
 <script th:inline="javascript">
   const cuser = [[${cuser}]];
-  const id = [[${id}]];
+  const xmid = [[${xmid}]];
 
   layui.config({
     base: ctx + 'static/js/layuiExts/'
@@ -77,37 +76,38 @@
       }
     });
 
-    getXjDw(id);
+    getZb(xmid);
+
+    //根据项目id获取招标信息
+    function getZb(xmid) {
+      ZB.getZbByXmId(xmid, function (data) {
+        zb = data.data;
+        if (zb) {
+          //表单回显
+          form.val("zb_form", zb);
+        }
+      });
+    }
 
     //表单提交
     form.on('submit(submitBut)', function (data) {
-      let url = ctx + "CZF/WT/XJ/editXj";
-      let xj = {};
+      let url = ctx + "CZF/WT/ZB/aeZb";
+      let zb = {};
       for (let key in data.field) {
         let val = data.field[key];
         if (val) {
-          xj[key] = val;
+          zb[key] = val;
         }
       }
 
       let indexout = top.layer.getFrameIndex(window.name); //获取窗口索引
 
-      XJ.saveXjDw(xj, url, function (){
+      ZB.saveZb(zb, url, function (){
         top.layer.close(indexout); //关闭弹出框
         TAB.refreshLayerOpen();
         return false;
       });
     });
-
-    //获取项目信息
-    function getXjDw(id) {
-      XJ.getXjDwDetail(id, function (data) {
-        xjdw = data.data;
-        //表单回显
-        form.val("xjDw_editForm", xjdw);
-      });
-    }
-
   });
 </script>
 </body>

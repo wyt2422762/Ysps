@@ -16,9 +16,13 @@
     <!-- 方案列表 -->
     <div style="padding: 10px;">
       <div>
-        <div class="layui-inline" th:if="${sfyxj != '是'}">
+        <div class="layui-inline" th:if="${sfyxj != '是' && sfyxj != '已询价'}">
           <button th:if="${#lists.contains(opts, 'add')}" id="addXjDw" class="layui-btn layui-btn-normal"
                   style="margin-left:15px;">添加询价单位
+          </button>
+
+          <button th:if="${#lists.contains(opts, 'update')}" id="confirmXjDw" class="layui-btn layui-btn-warm"
+                  style="margin-left:15px;">确认询价单位
           </button>
         </div>
       </div>
@@ -28,9 +32,9 @@
       <script type="text/html" id="xjDwTableToolBar">
         <a th:if="${#lists.contains(opts, 'show')}" class="layui-btn layui-btn-xs"
            lay-event="mx">详情</a>
-        <a th:if="${sfyxj != '是' && #lists.contains(opts, 'update')}" class="layui-btn layui-btn-normal layui-btn-xs"
+        <a th:if="${(sfyxj != '是' && sfyxj != '已询价') && #lists.contains(opts, 'update')}" class="layui-btn layui-btn-normal layui-btn-xs"
            lay-event="edit">编辑</a>
-        <a th:if="${sfyxj != '是' && #lists.contains(opts, 'del')}" class="layui-btn layui-btn-danger layui-btn-xs"
+        <a th:if="${(sfyxj != '是' && sfyxj != '已询价') && #lists.contains(opts, 'del')}" class="layui-btn layui-btn-danger layui-btn-xs"
            lay-event="del">删除</a>
       </script>
     </div>
@@ -139,6 +143,20 @@
       });
     });
 
+    //确认按钮事件
+    $("#confirmXjDw").on('click', function () {
+      let url = ctx + "CZF/WT/XJ/confirmXj/" + xmid;
+      top.layer.confirm('确定要确认询价单位？', {
+        btn: ['确定', '取消'] //按钮
+      }, function () {
+        XJ.confirmXjDw(xmid, function () {
+          window.location.reload();
+          return false;
+        });
+      }, function () {
+      });
+    });
+
     //显示添加修改弹出框
     function showAeDialog(url, title) {
       top.layer.open({
@@ -151,7 +169,7 @@
         btn: ['确定', '取消'],
         yes: function (index, layero) {
           let body = top.layer.getChildFrame('body', index);
-          let frm = $(body).find("form#xjDw_editForm");
+          let frm = $(body).find("form#xjDw_Form");
           $(frm).find("button.sb").click();
           return false;
         },
