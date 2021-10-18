@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/common/header::header(~{::title},~{},~{})">
+  <title>预算评审系统-委托-打包</title>
+</head>
+<body>
+<input type="hidden" id="opts" th:value="${optsStr}"/>
+
+<div class="layui-tab-item layui-show" style="padding: 10px;">
+  <div id="LAY_preview">
+    <fieldset class="layui-elem-field layui-field-title">
+      <legend>打包列表</legend>
+    </fieldset>
+
+    <!-- 打包列表 -->
+    <div style="padding: 10px;">
+      <div></div>
+      <table id="dbTable" class="layui-table" lay-filter="dbTable"></table>
+      <script type="text/html" id="dbTableToolBar"></script>
+    </div>
+  </div>
+</div>
+
+<div th:replace="/common/footer::footer()"></div>
+
+<script type="text/javascript" th:src="@{/static/js/wt/db.js}"></script>
+
+<script th:inline="javascript">
+  const cuser = [[${cuser}]];
+  const opts = [[${opts}]];
+
+  layui.config({
+    base: ctx + 'static/js/layuiExts/'
+  }).use(['element', 'laydate', 'table', 'form'], function () {
+    //let element = layui.element;
+    let laydate = layui.laydate;
+    let form = layui.form;
+    let table = layui.table;
+
+    //表单验证
+    form.verify({
+      cnumber: function (value, item) {
+        let reg = new RegExp("^\\d+(?:\\.\\d{1,2})?$")
+        if (value && isNaN(value)) {
+          return "只能输入数字";
+        }
+        if (value && !reg.test(value)) {
+          return "最多两位小数";
+        }
+      }
+    });
+
+    //获取方案管理列表
+    function getTableData(params) {
+      let url = ctx + 'CZF/WT/DB/getList';
+      //获取表格数据
+      table.render({
+        elem: '#dbTable',
+        title: '打包列表',
+        url: url, //数据接口
+        where: params, //请求参数
+        page: {
+          layout: ['prev', 'page', 'next', 'skip', 'count']
+        },
+        // page: true,
+        limit: 10,
+        //limits: [10, 20, 50],
+        cols: [[ //表头
+          {field: 'jgmc', title: '机构名称'},
+          {field: 'jgzz', title: '机构资质'},
+          {field: 'lxr', title: "联系人"},
+          {field: 'lxdh', title: "联系电话"},
+          {field: 'bj', title: "报价"},
+
+          {field: 'sfzb', title: '是否中标'},
+
+          {fixed: 'right', align: 'center', title: '操作', toolbar: '#xjDwTableToolBar'}
+        ]],
+        parseData: function (res) { //res 即为原始返回的数据
+          return {
+            "code": res.success ? 0 : 1, //解析接口状态
+            "msg": res.msg, //解析提示文本
+            "count": res.data.totalRecord, //解析数据长度
+            "data": res.data.dataList //解析数据列表
+          };
+        }
+      });
+    }
+
+    //获取初始数据
+    function getInitData(){
+      getTableData();
+    }
+
+  });
+</script>
+</body>
+</html>
