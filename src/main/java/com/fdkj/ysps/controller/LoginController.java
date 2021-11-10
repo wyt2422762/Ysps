@@ -40,7 +40,12 @@ public class LoginController {
     private SystemApi systemApi;
 
     @RequestMapping("toLogin")
-    public ModelAndView toLogin() {
+    public ModelAndView toLogin(HttpServletRequest request,
+                                HttpServletResponse response) throws Exception {
+        User cuser = systemApi.getUserFromCookie(request);
+        if(cuser != null) {
+            return new ModelAndView("redirect:/");
+        }
         return new ModelAndView("login");
     }
 

@@ -370,6 +370,8 @@
 
           //下载附件方法
           tr.find('.fj-download').on('click', function () {
+            let path = $(this).attr("data-fjdz");
+            let name = $(this).attr("data-fjmc");
             XMFJ.downloadXmfj(path, name);
             return false;
           });

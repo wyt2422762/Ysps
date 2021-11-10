@@ -296,8 +296,8 @@
         btn: ['确定', '取消'] //按钮
       }, function () {
         //调用接口删除已上传的文件
-        let path = $(this).attr("data-fjdz");
-        let name = $(this).attr("data-fjmc");
+        let path = $(that).attr("data-fjdz");
+        let name = $(that).attr("data-fjmc");
         XMFJ.delXmFj(path, function () {
           //delete that.files[index]; //删除对应的文件
           tr.remove();
@@ -322,6 +322,8 @@
     //下载附件方法
     $("tbody").on('click', 'button.fj-download', function () {
       debugger;
+      let path = $(this).attr("data-fjdz");
+      let name = $(this).attr("data-fjmc");
       XMFJ.downloadXmfj(path, name);
       return false;
     });
